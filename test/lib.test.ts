@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  computeGroupTrends,
+  computePoolTopPicks,
+  computeSeasonPoolTopTeams,
   computeWeeklyPending,
   FINISHED_STATUSES,
   gameHeaderLines,
@@ -67,15 +70,38 @@ describe("withGroupRank", () => {
     const result = withGroupRank(entries);
     expect(result.map((r: { groupRankLabel: string }) => r.groupRankLabel)).toEqual(["T1", "T1", "3"]);
   });
+
+  // Regression: equal score alone isn't a real tie once tiebreakerDiff is
+  // known — two filtered users can share a score but still be fully
+  // separated by Splash's own (lower-is-better) tiebreaker, and the incoming
+  // order already reflects that separation.
+  it("breaks an equal-score tie using tiebreakerDiff instead of showing a shared T-rank", () => {
+    const entries = [
+      entry({ handle: "A", score: 11, tiebreakerDiff: 19 }),
+      entry({ handle: "B", score: 11, tiebreakerDiff: 35 }),
+      entry({ handle: "C", score: 9, tiebreakerDiff: 5 }),
+    ];
+    const result = withGroupRank(entries);
+    expect(result.map((r: { groupRankLabel: string }) => r.groupRankLabel)).toEqual(["1", "2", "3"]);
+  });
+
+  it("still ties when score and tiebreakerDiff are both identical", () => {
+    const entries = [
+      entry({ handle: "A", score: 11, tiebreakerDiff: 19 }),
+      entry({ handle: "B", score: 11, tiebreakerDiff: 19 }),
+    ];
+    const result = withGroupRank(entries);
+    expect(result.map((r: { groupRankLabel: string }) => r.groupRankLabel)).toEqual(["T1", "T1"]);
+  });
 });
 
 describe("computeWeeklyPending", () => {
-  it("subtracts decided picks (wins+losses+ties) from the required count", () => {
-    expect(computeWeeklyPending({ wins: 10, losses: 9, ties: null, picks: [] }, 20)).toBe(1);
+  it("subtracts wins from potentialPoints (Splash's own max-reachable-score)", () => {
+    expect(computeWeeklyPending({ wins: 10, losses: 9, ties: null, potentialPoints: 11, picks: [] })).toBe(1);
   });
 
-  it("counts ties toward decided", () => {
-    expect(computeWeeklyPending({ wins: 9, losses: 9, ties: 1, picks: [] }, 20)).toBe(1);
+  it("is zero once potentialPoints equals wins", () => {
+    expect(computeWeeklyPending({ wins: 9, losses: 9, ties: 1, potentialPoints: 9, picks: [] })).toBe(0);
   });
 });
 
@@ -197,5 +223,127 @@ describe("pickCellClass", () => {
 
   it("is pending when grade is null and the game hasn't started", () => {
     expect(pickCellClass(pick({ grade: null }), game({ status: "scheduled" }))).toBe("pick-pending");
+  });
+
+  // Regression: this is what makes pool-wide picks (which never have a
+  // per-pick `grade` — we only track team+spread for the ~120 entrants
+  // outside our filtered group) show a real result once their game ends,
+  // instead of the old fallback's permanent "pending" for anything not live.
+  it("computes won/lost/push purely from score+spread once the game is finished, with no grade at all", () => {
+    const finishedGame = game({
+      status: "finalized",
+      home: { alias: "HOME", name: "H", spread: -3.5, score: 24 },
+      away: { alias: "AWAY", name: "A", spread: 3.5, score: 10 },
+    });
+    expect(pickCellClass({ team: { alias: "HOME" }, spread: -3.5, grade: null }, finishedGame)).toBe("pick-won");
+    expect(pickCellClass({ team: { alias: "AWAY" }, spread: 3.5, grade: null }, finishedGame)).toBe("pick-lost");
+  });
+});
+
+function weekEntry(picks: unknown[]) {
+  return { wins: 0, losses: 0, ties: null, potentialPoints: 0, picks };
+}
+
+describe("computeGroupTrends", () => {
+  it("includes a consensus pick once enough users agree, tagged with its live status", () => {
+    const users = {
+      A: weekEntry([pick({ gameId: "g1", team: { alias: "OSU", name: "Ohio State" }, spread: -3.5, grade: "won" })]),
+      B: weekEntry([pick({ gameId: "g1", team: { alias: "OSU", name: "Ohio State" }, spread: -3.5, grade: "won" })]),
+      C: weekEntry([pick({ gameId: "g1", team: { alias: "OSU", name: "Ohio State" }, spread: -3.5, grade: "won" })]),
+    };
+    const gamesById = new Map([["g1", game({ gameId: "g1" })]]);
+    expect(computeGroupTrends(users, gamesById)).toEqual([
+      {
+        gameId: "g1",
+        teams: [
+          {
+            team: { alias: "OSU", name: "Ohio State" },
+            handles: ["A", "B", "C"],
+            count: 3,
+            statusClass: "pick-won",
+          },
+        ],
+        isConsensus: true,
+        isSplit: false,
+        maxCount: 3,
+      },
+    ]);
+  });
+
+  it("includes a head-to-head split even below the consensus threshold, identifying the winning side", () => {
+    const finishedGame = game({
+      gameId: "g1",
+      status: "finalized",
+      home: { alias: "OSU", name: "Ohio State", spread: -3.5, score: 24 },
+      away: { alias: "MICH", name: "Michigan", spread: 3.5, score: 10 },
+    });
+    const users = {
+      A: weekEntry([pick({ gameId: "g1", team: { alias: "OSU", name: "Ohio State" }, spread: -3.5, grade: null })]),
+      B: weekEntry([pick({ gameId: "g1", team: { alias: "MICH", name: "Michigan" }, spread: 3.5, grade: null })]),
+    };
+    const result = computeGroupTrends(users, new Map([["g1", finishedGame]]));
+    expect(result).toHaveLength(1);
+    expect(result[0].isSplit).toBe(true);
+    expect(result[0].isConsensus).toBe(false);
+    const [osuRow, michRow] = result[0].teams;
+    expect(osuRow).toMatchObject({ team: { alias: "OSU" }, statusClass: "pick-won" });
+    expect(michRow).toMatchObject({ team: { alias: "MICH" }, statusClass: "pick-lost" });
+  });
+
+  it("drops a game with too few agreeing picks and no disagreement", () => {
+    const users = {
+      A: weekEntry([pick({ gameId: "g1", team: { alias: "OSU", name: "Ohio State" } })]),
+      B: weekEntry([pick({ gameId: "g1", team: { alias: "OSU", name: "Ohio State" } })]),
+    };
+    expect(computeGroupTrends(users, new Map())).toEqual([]);
+  });
+
+  it("respects a custom consensusThreshold", () => {
+    const users = {
+      A: weekEntry([pick({ gameId: "g1", team: { alias: "OSU", name: "Ohio State" } })]),
+      B: weekEntry([pick({ gameId: "g1", team: { alias: "OSU", name: "Ohio State" } })]),
+    };
+    expect(computeGroupTrends(users, new Map(), { consensusThreshold: 2 })[0].isConsensus).toBe(true);
+  });
+});
+
+describe("computePoolTopPicks", () => {
+  it("sorts by count descending, computes percent of the pool, truncates to topX, and tags status", () => {
+    const finishedGame = game({
+      gameId: "g2",
+      status: "finalized",
+      home: { alias: "ALA", name: "Alabama", spread: -3.5, score: 24 },
+      away: { alias: "AUB", name: "Auburn", spread: 3.5, score: 10 },
+    });
+    const counts = [
+      { gameId: "g1", team: { alias: "OSU", name: "Ohio State" }, count: 80 },
+      { gameId: "g1", team: { alias: "MICH", name: "Michigan" }, count: 20 },
+      { gameId: "g2", team: { alias: "ALA", name: "Alabama" }, count: 90 },
+    ];
+    const gamesById = new Map([["g2", finishedGame]]);
+    const result = computePoolTopPicks(counts, 100, gamesById, 2);
+    expect(result).toEqual([
+      { gameId: "g2", team: { alias: "ALA", name: "Alabama" }, count: 90, pct: 90, statusClass: "pick-won" },
+      { gameId: "g1", team: { alias: "OSU", name: "Ohio State" }, count: 80, pct: 80, statusClass: "pick-pending" },
+    ]);
+  });
+
+  it("returns 0% rather than dividing by zero when the pool is empty", () => {
+    const counts = [{ gameId: "g1", team: { alias: "OSU", name: "Ohio State" }, count: 0 }];
+    expect(computePoolTopPicks(counts, 0, new Map())[0].pct).toBe(0);
+  });
+});
+
+describe("computeSeasonPoolTopTeams", () => {
+  it("sums a team's pick count across every slate, keyed by team alias rather than gameId", () => {
+    const slates = [
+      { poolPickCounts: [{ gameId: "g1", team: { alias: "OSU", name: "Ohio State" }, count: 80 }] },
+      { poolPickCounts: [{ gameId: "g9", team: { alias: "OSU", name: "Ohio State" }, count: 70 }] },
+    ];
+    expect(computeSeasonPoolTopTeams(slates)).toEqual([{ team: { alias: "OSU", name: "Ohio State" }, count: 150 }]);
+  });
+
+  it("tolerates a slate with no poolPickCounts (cached before this field existed)", () => {
+    expect(computeSeasonPoolTopTeams([{ poolPickCounts: undefined }])).toEqual([]);
   });
 });

@@ -1,6 +1,6 @@
 // Pure logic shared by app.js, extracted into its own module so it can be
 // unit tested directly (see test/lib.test.ts) without a DOM. Everything here
-// takes plain data in and returns plain data out — no globals, no fetch, no
+// takes plain data in and returns plain data out,no globals, no fetch, no
 // document/localStorage access.
 
 export function recordText(entry) {
@@ -14,15 +14,16 @@ export function winPct(entry) {
 }
 
 // Ranks the already globally-sorted, pre-filtered entries 1..N among
-// themselves, marking ties (equal score) the same way the site's own
-// displayRank does.
+// themselves. Entries only share a rank (marked with a "T" prefix) when
+// score AND tiebreakerDiff both match
 export function withGroupRank(entries) {
   let rank = 0;
-  let lastScore = null;
+  let lastKey = null;
   const withRank = entries.map((entry, i) => {
-    if (entry.score !== lastScore) {
+    const key = `${entry.score}:${entry.tiebreakerDiff}`;
+    if (key !== lastKey) {
       rank = i + 1;
-      lastScore = entry.score;
+      lastKey = key;
     }
     return { entry, groupRank: rank };
   });
@@ -34,29 +35,19 @@ export function withGroupRank(entries) {
   return withRank;
 }
 
-// How many of this week's required picks are still undecided. Mirrors
-// src/picks.ts's computePendingCount exactly (same week.wins/losses/ties
-// approach, not pick-grade counting) — see that function's doc comment for
-// why counting grades ourselves is the wrong move. Duplicated here rather
-// than shared because the frontend and the Worker are separate runtimes with
-// no shared module boundary today.
-export function computeWeeklyPending(week, picksRequiredCount) {
-  const decided = week.wins + week.losses + (week.ties ?? 0);
-  return picksRequiredCount - decided;
+// How many of this week's required picks are still undecided
+export function computeWeeklyPending(week) {
+  return week.potentialPoints - week.wins;
 }
 
 // Splash uses more than one terminal status ("finalized" and "finished" both
-// seen for completed games) — anything not in this set and not "scheduled"
-// is treated as live.
+// seen for completed games), anything other than this and scheduled is considered live
 export const FINISHED_STATUSES = new Set(["finalized", "finished"]);
 
 export function isLiveGame(game) {
   return Boolean(game) && game.status !== "scheduled" && !FINISHED_STATUSES.has(game.status);
 }
 
-// Matchup line with the home team's own spread folded in ("UCLA @ CAL
-// (+1.5)") instead of a separate row, plus — once the game has started — a
-// second line with just the score, and a third with quarter/clock if live.
 export function gameHeaderLines(game) {
   const spread = game.home.spread;
   const spreadText = spread > 0 ? `+${spread}` : `${spread}`;
@@ -71,28 +62,21 @@ export function gameHeaderLines(game) {
   return { matchup, detail, live: !finished, clock };
 }
 
-// For an ungraded pick on a live game, is it currently covering the spread
-// it was picked at? Uses the same (score margin + spread) math the eventual
-// `grade` is based on, just computed live against the current score instead
-// of the final one.
-function livePickClass(pick, game) {
-  if (!isLiveGame(game) || game.home.score == null || game.away.score == null) {
-    return "pick-pending";
+export function coverStatus(teamAlias, spread, game) {
+  if (!game || game.status === "scheduled" || game.home.score == null || game.away.score == null) {
+    return "pending";
   }
-  const pickIsHome = pick.team.alias === game.home.alias;
-  const pickScore = pickIsHome ? game.home.score : game.away.score;
-  const oppScore = pickIsHome ? game.away.score : game.home.score;
-  const coverMargin = pickScore - oppScore + pick.spread;
-  if (coverMargin > 0) return "pick-live-winning";
-  if (coverMargin < 0) return "pick-live-losing";
-  return "pick-live-tied";
+  const isHome = teamAlias === game.home.alias;
+  const teamScore = isHome ? game.home.score : game.away.score;
+  const oppScore = isHome ? game.away.score : game.home.score;
+  const margin = teamScore - oppScore + spread;
+  const finished = FINISHED_STATUSES.has(game.status);
+  if (margin > 0) return finished ? "won" : "live-winning";
+  if (margin < 0) return finished ? "lost" : "live-losing";
+  return finished ? "push" : "live-tied";
 }
 
-// Prefers Splash's own grade when it tells us anything ("won"/"lost"/"push"
-// are final; "winning"/"losing" are its own live read, seen on any
-// in-progress game, not just the tiebreaker) and only falls back to our own
-// score-based guess (livePickClass) when grade is null — a live game Splash
-// hasn't graded yet.
+// Take splash grade first and fall back to coverStatus if needed
 export function pickCellClass(pick, game) {
   switch (pick.grade) {
     case "won":
@@ -106,8 +90,90 @@ export function pickCellClass(pick, game) {
     case "losing":
       return "pick-live-losing";
     default:
-      return livePickClass(pick, game);
+      return `pick-${coverStatus(pick.team.alias, pick.spread, game)}`;
   }
+}
+
+// Groups our filtered users' picks by game and surfaces only the
+// interesting ones: 
+//  a consensus (>= consensusThreshold users on the same team) 
+//    or a head-to-head split (our own users on opposite sides of the same game)
+// Sorted by how many people on the same side
+export function computeGroupTrends(users, gamesById, { consensusThreshold = 3 } = {}) {
+  const byGame = new Map();
+
+  for (const [handle, week] of Object.entries(users)) {
+    for (const pick of week.picks) {
+      let teams = byGame.get(pick.gameId);
+      if (!teams) {
+        teams = new Map();
+        byGame.set(pick.gameId, teams);
+      }
+      let teamRow = teams.get(pick.team.alias);
+      if (!teamRow) {
+        teamRow = { team: pick.team, handles: [], pick };
+        teams.set(pick.team.alias, teamRow);
+      }
+      teamRow.handles.push(handle);
+    }
+  }
+
+  const rows = [];
+  for (const [gameId, teams] of byGame) {
+    const game = gamesById.get(gameId);
+    const teamRows = [...teams.values()]
+      .map((t) => ({
+        team: t.team,
+        handles: t.handles,
+        count: t.handles.length,
+        statusClass: pickCellClass(t.pick, game),
+      }))
+      .sort((a, b) => b.count - a.count);
+    const maxCount = teamRows[0].count;
+    const isSplit = teamRows.length > 1;
+    const isConsensus = maxCount >= consensusThreshold;
+    if (!isSplit && !isConsensus) continue;
+    rows.push({ gameId, teams: teamRows, isConsensus, isSplit, maxCount });
+  }
+
+  return rows.sort((a, b) => b.maxCount - a.maxCount);
+}
+
+// Top teams by pool-wide pick count for one slate
+export function computePoolTopPicks(poolPickCounts, poolEntryCount, gamesById, topX = 10) {
+  return [...poolPickCounts]
+    .sort((a, b) => b.count - a.count)
+    .slice(0, topX)
+    .map((p) => {
+      const game = gamesById.get(p.gameId);
+      const spread = game && p.team.alias === game.home.alias ? game.home.spread : game?.away.spread;
+      return {
+        ...p,
+        pct: poolEntryCount > 0 ? Math.round((p.count / poolEntryCount) * 100) : 0,
+        statusClass: pickCellClass({ team: p.team, spread }, game),
+      };
+    });
+}
+
+// Same idea as computePoolTopPicks but summed across every cached slate, 
+// by team rather than by game (a team's game/gameId changes week to week, but its alias/name doesn't)
+export function computeSeasonPoolTopTeams(slates, topX = 10) {
+  const byTeam = new Map();
+
+  for (const slate of slates) {
+    for (const p of slate.poolPickCounts ?? []) {
+      const existing = byTeam.get(p.team.alias);
+      if (existing) {
+        existing.count += p.count;
+      } else {
+        byTeam.set(p.team.alias, { team: p.team, count: p.count });
+      }
+    }
+  }
+
+  return [...byTeam.values()]
+    .sort((a, b) => b.count - a.count || a.team.name.localeCompare(b.team.name))
+    .slice(0, topX);
 }
 
 // Live games first (so what's happening right now is immediately visible),

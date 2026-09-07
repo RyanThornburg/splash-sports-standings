@@ -16,6 +16,7 @@
         <button class="tab-button active" data-tab="overall">Overall</button>
         <button class="tab-button" data-tab="weekly">Weekly</button>
         <button class="tab-button" data-tab="aggregates">Team Picks</button>
+        <button class="tab-button" data-tab="trends">Trends</button>
       </nav>
 
       <section id="tab-overall" class="tab-panel">
@@ -63,6 +64,25 @@
         </label>
         <div id="aggregates-content"></div>
         <p id="aggregates-empty" class="empty" hidden>No pick data yet.</p>
+      </section>
+
+      <section id="tab-trends" class="tab-panel" hidden>
+        <label class="picker">
+          Week:
+          <select id="trends-select"></select>
+        </label>
+
+        <h2 class="trends-heading">Our Group</h2>
+        <div id="trends-group-content"></div>
+        <p id="trends-group-empty" class="empty" hidden>No consensus or split picks this week.</p>
+
+        <h2 class="trends-heading">Pool - Most Picked This Week</h2>
+        <div id="trends-pool-week-content"></div>
+        <p id="trends-pool-week-empty" class="empty" hidden>No pool pick data yet.</p>
+
+        <h2 class="trends-heading">Pool - Most Picked This Season</h2>
+        <div id="trends-pool-season-content"></div>
+        <p id="trends-pool-season-empty" class="empty" hidden>No pool pick data yet.</p>
       </section>
     </main>
     <script type="module" src="/app.js"></script>

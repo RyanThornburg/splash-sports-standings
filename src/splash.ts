@@ -35,7 +35,7 @@ export interface SplashLeaderboardEntry {
     };
   };
   tiebreaker: {
-    steps: Array<{ value: string; total: number | null; submitted?: number | null }>;
+    steps: Array<{ value: string; total: number | null }>;
   };
 }
 
@@ -54,10 +54,7 @@ export interface StandingsEntry {
   wins: number;
   losses: number;
   ties: number | null;
-  // Guess-the-score tiebreaker (e.g. LOU vs MISS), as |actual - guessed|.
-  // null until that game has been played and both values are known.
   tiebreakerDiff: number | null;
-  // Filled in later, from the current week's picks — null until then.
   pending: number | null;
 }
 
@@ -104,10 +101,7 @@ export async function fetchFullLeaderboard(
 
 export function toStandingsEntry(entry: SplashLeaderboardEntry): StandingsEntry {
   const tiebreakerStep = entry.tiebreaker.steps.find((step) => step.value === "last_game_total");
-  const tiebreakerDiff =
-    tiebreakerStep?.total != null && tiebreakerStep?.submitted != null
-      ? Math.abs(tiebreakerStep.total - tiebreakerStep.submitted)
-      : null;
+  const tiebreakerDiff = tiebreakerStep?.total ?? null;
 
   return {
     rank: entry.rank,

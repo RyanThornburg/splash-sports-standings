@@ -3,10 +3,12 @@ import { getValidIdToken, setRefreshToken } from "./auth";
 import { fetchFullLeaderboard, toStandingsEntry, type StandingsEntry } from "./splash";
 import {
   computePendingCount,
+  computePoolPickCounts,
   computeTeamAggregates,
-  fetchEntryWeek,
   fetchGameCatalog,
+  fetchSlateWeeks,
   fetchSlates,
+  type PoolPickCount,
   type SlateGame,
   type WeeklyEntryResult,
 } from "./picks";
@@ -35,11 +37,11 @@ interface CachedSlate {
   pickLockDate: string;
   picksRequiredCount: number;
   games: SlateGame[];
-  // Once a slate is settled its results can't change, so it's fetched once
-  // and never refetched — keeps us from hammering Splash's API every 15 min
-  // for weeks that are long over.
-  final: boolean;
+  final: boolean;  // week results can't change after settling, no need to call api for prior weeks already cached
   users: Record<string, WeeklyEntryResult>;
+  // trends tab data for entire pool (not just filtered list)
+  poolEntryCount: number; 
+  poolPickCounts: PoolPickCount[];
 }
 
 interface WeeklyCache {
@@ -68,7 +70,7 @@ async function refreshWeeklyCache(
 
   for (const slate of slates) {
     if (slate.status === "scheduled" && !slate.isCurrentSlate) {
-      // Hasn't started — Splash has no picks/results data for it yet.
+      // Hasn't started or Splash has no picks/results data for it yet.
       continue;
     }
 
@@ -79,10 +81,11 @@ async function refreshWeeklyCache(
     }
 
     const games = await fetchGameCatalog(idToken, CONTEST_ID, slate.id);
+    const weekByHandle = await fetchSlateWeeks(idToken, CONTEST_ID, slate.id);
 
     const users: Record<string, WeeklyEntryResult> = {};
     for (const entry of seasonEntries) {
-      const week = await fetchEntryWeek(idToken, CONTEST_ID, slate.id, entry.entryId);
+      const week = weekByHandle.get(entry.handle);
       if (week) {
         users[entry.handle] = week;
       }
@@ -98,6 +101,8 @@ async function refreshWeeklyCache(
       games,
       final: slate.settledDate !== null,
       users,
+      poolEntryCount: weekByHandle.size,
+      poolPickCounts: computePoolPickCounts(weekByHandle),
     });
   }
 
@@ -123,14 +128,14 @@ function computeAggregatesCache(weekly: WeeklyCache, handles: string[]): Aggrega
 }
 
 // Attaches each entry's pending-picks count for the current week, using the
-// weekly cache we just built (rather than a separate fetch).
+// weekly cache we just built (rather than a separate fetch)
 function applyPendingCounts(entries: StandingsEntry[], weekly: WeeklyCache): void {
   const currentSlate = weekly.slates.find((slate) => slate.isCurrentSlate);
   if (!currentSlate) return;
 
   for (const entry of entries) {
     const week = currentSlate.users[entry.handle];
-    entry.pending = week ? computePendingCount(week, currentSlate.picksRequiredCount) : null;
+    entry.pending = week ? computePendingCount(week) : null;
   }
 }
 

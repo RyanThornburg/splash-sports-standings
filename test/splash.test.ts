@@ -9,7 +9,7 @@ function leaderboardEntry(overrides: Partial<SplashLeaderboardEntry> = {}): Spla
     user: { handle: "ABRUNE" },
     entry: { id: "entry_1", displayName: null },
     metadata: { record: { wins: 18, losses: 2, ties: null } },
-    tiebreaker: { steps: [{ value: "wins", total: 18, submitted: null }] },
+    tiebreaker: { steps: [{ value: "wins", total: 18 }] },
     ...overrides,
   };
 }
@@ -33,9 +33,9 @@ describe("toStandingsEntry", () => {
     });
   });
 
-  it("computes tiebreakerDiff as |total - submitted| once both are known", () => {
+  it("takes tiebreakerDiff directly from the last_game_total step's total (Splash precomputes the diff)", () => {
     const entry = leaderboardEntry({
-      tiebreaker: { steps: [{ value: "last_game_total", total: 45, submitted: 51 }] },
+      tiebreaker: { steps: [{ value: "last_game_total", total: 6 }] },
     });
 
     expect(toStandingsEntry(entry).tiebreakerDiff).toBe(6);
@@ -43,22 +43,14 @@ describe("toStandingsEntry", () => {
 
   it("leaves tiebreakerDiff null while the tiebreaker game is undecided", () => {
     const entry = leaderboardEntry({
-      tiebreaker: { steps: [{ value: "last_game_total", total: null, submitted: 51 }] },
-    });
-
-    expect(toStandingsEntry(entry).tiebreakerDiff).toBeNull();
-  });
-
-  it("leaves tiebreakerDiff null when the user hasn't submitted a guess", () => {
-    const entry = leaderboardEntry({
-      tiebreaker: { steps: [{ value: "last_game_total", total: 45, submitted: null }] },
+      tiebreaker: { steps: [{ value: "last_game_total", total: null }] },
     });
 
     expect(toStandingsEntry(entry).tiebreakerDiff).toBeNull();
   });
 
   it("leaves tiebreakerDiff null when there's no last_game_total step at all", () => {
-    const entry = leaderboardEntry({ tiebreaker: { steps: [{ value: "wins", total: 18, submitted: null }] } });
+    const entry = leaderboardEntry({ tiebreaker: { steps: [{ value: "wins", total: 18 }] } });
 
     expect(toStandingsEntry(entry).tiebreakerDiff).toBeNull();
   });

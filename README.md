@@ -67,7 +67,7 @@ Two ways to refresh:
    npx wrangler secret put ADMIN_TOKEN
    ```
 
-2. Save this as a browser bookmark (edit the bookmark's URL field), replacing `ADMIN_TOKEN_VALUE` **and** `YOUR-SUBDOMAIN` with your actual values (your Worker's real URL isn't written here on purpose, so it doesn't end up in git — check `wrangler.jsonc`/your Cloudflare dashboard for it):
+2. Save this as a browser bookmark (edit the bookmark's URL field), replacing `ADMIN_TOKEN_VALUE` **and** `YOUR-SUBDOMAIN` with your actual values (your Worker's real URL isn't written here on purpose, so it doesn't end up in git, check `wrangler.jsonc`/your Cloudflare dashboard for it):
 
    ```js
    javascript:(function () { var match = document.cookie.match(/(?:^|; )refreshToken=([^;]+)/); if (!match) { alert("refreshToken cookie not found! Are you logged into Splash Sports?"); return; } var token = decodeURIComponent(match[1]); fetch("https://splash-sports-standings.YOUR-SUBDOMAIN.workers.dev/api/refresh-token", { method: "POST", headers: { Authorization: "Bearer ADMIN_TOKEN_VALUE", "Content-Type": "application/json" }, body: JSON.stringify({ refreshToken: token }) }).then(function (r) { return r.json(); }).then(function (d) { alert(d.ok ? "Refresh token updated! Site is live again." : "Failed: " + d.error); }).catch(function (e) { alert("Request failed: " + e); }); })();

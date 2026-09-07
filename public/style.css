@@ -5,6 +5,12 @@
   --muted: #666666;
   --border: #e0e0e0;
   --row-alt: #f7f7f7;
+  /* Sequential single hue for pick-popularity magnitude bars (Trends tab) —
+     deliberately distinct from the good/bad status colors below it so a
+     "how popular" bar is never mistaken for a "won/lost" signal. */
+  --accent: #2a78d6;
+  --good: #1a7f37;
+  --bad: #cf222e;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -14,6 +20,9 @@
     --muted: #9a9a9a;
     --border: #2c2f36;
     --row-alt: #1b1e24;
+    --accent: #3987e5;
+    --good: #4ade80;
+    --bad: #f87171;
   }
 }
 
@@ -253,6 +262,174 @@ th.game-header-live {
   #standings th {
     font-size: 0.65rem;
   }
+}
+
+.trends-heading {
+  font-size: 0.95rem;
+  margin: 1.5rem 0 0.5rem;
+}
+
+.trends-heading:first-of-type {
+  margin-top: 0;
+}
+
+/* Group trends: one compact row per interesting game — a stacked bar split
+   into one segment per team, sized by pick count, so a 3-1 split reads as a
+   75/25 bar rather than two equal-looking boxes. A single-team row (pure
+   consensus) is just a full-width bar. */
+.trend-row {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.trend-matchup {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-bottom: 0.3rem;
+}
+
+.trend-labels,
+.trend-bar,
+.trend-handles-row {
+  display: flex;
+  gap: 3px;
+}
+
+.trend-labels {
+  margin-bottom: 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.trend-label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.trend-label span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trend-bar {
+  height: 14px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.trend-segment {
+  min-width: 3px;
+}
+
+.trend-segment-good {
+  background: var(--good);
+}
+
+.trend-segment-bad {
+  background: var(--bad);
+}
+
+.trend-segment-neutral {
+  background: var(--border);
+}
+
+.trend-handles-row {
+  margin-top: 0.3rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.trend-handles-cell {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Status icon: icon + color together, text never carries the color alone. */
+.trend-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.trend-status-good {
+  color: var(--good);
+  background: color-mix(in srgb, var(--good) 18%, transparent);
+}
+
+.trend-status-bad {
+  color: var(--bad);
+  background: color-mix(in srgb, var(--bad) 18%, transparent);
+}
+
+.trend-status-neutral {
+  color: var(--muted);
+  background: var(--row-alt);
+}
+
+/* Pool trends: a compact magnitude-bar list (one hue, sequential — see
+   --accent) rather than a table, so relative popularity reads at a glance. */
+.meter-row {
+  padding: 0.5rem 0;
+}
+
+.meter-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-bottom: 0.3rem;
+  font-size: 0.85rem;
+}
+
+.meter-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.meter-team {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meter-game {
+  font-size: 0.75rem;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meter-value {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.meter-track {
+  height: 10px;
+  background: var(--border);
+  border-radius: 0 5px 5px 0;
+}
+
+.meter-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 0 5px 5px 0;
 }
 
 .picker {

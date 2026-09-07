@@ -32,10 +32,8 @@ export async function fetchSlates(idToken: string, contestId: string): Promise<S
   return ((await response.json()) as SlatesResponse).data;
 }
 
-// "winning"/"losing" are Splash's own live-tracking values for any
-// in-progress game (confirmed on both a regular game and the tiebreaker
-// game, not just the latter) — not a final grade. null means the game
-// hasn't started or hasn't graded yet.
+// "winning"/"losing" are Splash's own values for any in-progress game, 
+// not a final grade. null means the game hasn't started or hasn't graded yet.
 type PickGrade = "won" | "lost" | "push" | "winning" | "losing" | null;
 
 export interface WeeklyPick {
@@ -50,49 +48,70 @@ export interface WeeklyEntryResult {
   wins: number;
   losses: number;
   ties: number | null;
+  // Splash's own precomputed max reachable score
+  potentialPoints: number;
   picks: WeeklyPick[];
 }
 
 interface WeeklyLeaderboardEntry {
+  user: { handle: string };
   metadata: { record: { wins: number; losses: number; ties: number | null } };
+  metrics: Array<{ type: string; value: number }>;
   picks: { data: WeeklyPick[] } | null;
 }
 
 interface WeeklyLeaderboardResponse {
   data: WeeklyLeaderboardEntry[];
+  nextCursor: string | null;
 }
 
-// Returns null when the entry has no picks/results for this slate yet (e.g. a
-// future week that hasn't started — the API returns an empty `data` array).
-export async function fetchEntryWeek(
+const WEEKLY_PAGE_LIMIT = 150;
+const WEEKLY_MAX_PAGES = 50;
+
+export async function fetchSlateWeeks(
   idToken: string,
   contestId: string,
   slateId: string,
-  entryId: string,
-): Promise<WeeklyEntryResult | null> {
-  const url = new URL(LEADERBOARD_URL);
-  url.searchParams.set("contestId", contestId);
-  url.searchParams.set("slateId", slateId);
-  url.searchParams.set("picksSlateId", slateId);
-  url.searchParams.set("entryId", entryId);
+): Promise<Map<string, WeeklyEntryResult>> {
+  const byHandle = new Map<string, WeeklyEntryResult>();
+  let cursor: string | null = null;
 
-  const response = await fetch(url, { headers: splashHeaders(idToken) });
-  if (!response.ok) {
-    throw new Error(`Splash Sports weekly picks request failed: ${response.status}`);
+  for (let page = 0; page < WEEKLY_MAX_PAGES; page++) {
+    const url = new URL(LEADERBOARD_URL);
+    url.searchParams.set("contestId", contestId);
+    url.searchParams.set("slateId", slateId);
+    url.searchParams.set("picksSlateId", slateId);
+    url.searchParams.set("limit", String(WEEKLY_PAGE_LIMIT));
+    if (cursor) {
+      url.searchParams.set("cursor", cursor);
+    }
+
+    const response = await fetch(url, { headers: splashHeaders(idToken) });
+    if (!response.ok) {
+      throw new Error(`Splash Sports weekly picks request failed: ${response.status}`);
+    }
+
+    const body = (await response.json()) as WeeklyLeaderboardResponse;
+    for (const entry of body.data) {
+      const wins = entry.metadata.record.wins;
+      const potentialPoints = entry.metrics.find((metric) => metric.type === "potential_points")?.value ?? wins;
+
+      byHandle.set(entry.user.handle, {
+        wins,
+        losses: entry.metadata.record.losses,
+        ties: entry.metadata.record.ties,
+        potentialPoints,
+        picks: entry.picks?.data ?? [],
+      });
+    }
+
+    if (!body.nextCursor) {
+      break;
+    }
+    cursor = body.nextCursor;
   }
 
-  const body = (await response.json()) as WeeklyLeaderboardResponse;
-  const entry = body.data[0];
-  if (!entry) {
-    return null;
-  }
-
-  return {
-    wins: entry.metadata.record.wins,
-    losses: entry.metadata.record.losses,
-    ties: entry.metadata.record.ties,
-    picks: entry.picks?.data ?? [],
-  };
+  return byHandle;
 }
 
 interface GameTeam {
@@ -110,12 +129,8 @@ interface GameState {
 export interface SlateGame {
   gameId: string;
   startsAt: string;
-  // Seen so far: "scheduled" (not started), "in_progress" (live),
-  // "finished" and "finalized" (both terminal — Splash uses two different
-  // strings for "done").
-  status: string;
-  // Only populated while status is "in_progress".
-  state: GameState | null;
+  status: string;   // "scheduled" (not started), "in_progress" (live), "finished" and "finalized"
+  state: GameState | null;    // Only populated while status is "in_progress".
   home: GameTeam;
   away: GameTeam;
 }
@@ -126,10 +141,8 @@ interface PicksheetResponse {
   };
 }
 
-// The no-entryId picksheets call returns the full game schedule/matchups for
-// a slate (spreads, teams) — used as a lookup so the weekly picks matrix can
-// show real matchups ("RUTG @ MASS") as column headers, not just whichever
-// side each individual user happened to pick.
+// The no-entryId picksheets call returns the full game schedule/matchups
+// used as a lookup so the weekly picks matrix can show real matchups
 export async function fetchGameCatalog(
   idToken: string,
   contestId: string,
@@ -155,17 +168,9 @@ export async function fetchGameCatalog(
   }));
 }
 
-// How many of this week's required picks are still undecided — either not
-// yet submitted, or submitted but the underlying game hasn't reached a final
-// grade. Deliberately uses Splash's own wins/losses/ties count rather than
-// inspecting individual pick grades ourselves: Splash has already surprised
-// us twice with grade/status strings we hadn't seen before ("winning"/
-// "losing" as a live, non-final grade; "finished" as a second terminal game
-// status alongside "finalized"), so trusting their own decided-picks count
-// is more robust than trying to keep our own classification exhaustive.
-export function computePendingCount(week: WeeklyEntryResult, picksRequiredCount: number): number {
-  const decided = week.wins + week.losses + (week.ties ?? 0);
-  return picksRequiredCount - decided;
+// How many of this week's required picks are still undecided
+export function computePendingCount(week: WeeklyEntryResult): number {
+  return week.potentialPoints - week.wins;
 }
 
 interface TeamPickStat {
@@ -176,8 +181,8 @@ interface TeamPickStat {
   losses: number;
 }
 
-// Tallies, per team a user picked across every week we have data for, how
-// often they picked that team and their win/loss record doing so.
+// Count per team a user picked across every week we have data for
+// how often they picked that team and their win/loss record doing so.
 export function computeTeamAggregates(weeks: WeeklyEntryResult[]): TeamPickStat[] {
   const byTeam = new Map<string, TeamPickStat>();
 
@@ -198,4 +203,31 @@ export function computeTeamAggregates(weeks: WeeklyEntryResult[]): TeamPickStat[
   }
 
   return [...byTeam.values()].sort((a, b) => b.picks - a.picks || a.teamName.localeCompare(b.teamName));
+}
+
+export interface PoolPickCount {
+  gameId: string;
+  team: { alias: string; name: string };
+  count: number;
+}
+
+// Counts how many of the WHOLE contest's entries (not just our filtered
+// subset) picked each team, per game, for one slate 
+// Only counts, not win/loss, to keep the cache small.
+export function computePoolPickCounts(weekByHandle: Map<string, WeeklyEntryResult>): PoolPickCount[] {
+  const counts = new Map<string, PoolPickCount>();
+
+  for (const week of weekByHandle.values()) {
+    for (const pick of week.picks) {
+      const key = `${pick.gameId}:${pick.team.alias}`;
+      const existing = counts.get(key);
+      if (existing) {
+        existing.count += 1;
+      } else {
+        counts.set(key, { gameId: pick.gameId, team: { alias: pick.team.alias, name: pick.team.name }, count: 1 });
+      }
+    }
+  }
+
+  return [...counts.values()];
 }
