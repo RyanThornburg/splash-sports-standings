@@ -1,0 +1,326 @@
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1a1a1a;
+  --muted: #666666;
+  --border: #e0e0e0;
+  --row-alt: #f7f7f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14161a;
+    --fg: #f0f0f0;
+    --muted: #9a9a9a;
+    --border: #2c2f36;
+    --row-alt: #1b1e24;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+main {
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+h1 {
+  font-size: 1.5rem;
+  margin: 0 0 0.25rem;
+}
+
+.updated {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0 0 0.5rem;
+}
+
+.stale-banner {
+  color: #92400e;
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  border-radius: 4px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .stale-banner {
+    color: #fde68a;
+    background: #422006;
+    border-color: #92400e;
+  }
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.5rem 0.35rem;
+  border-bottom: 1px solid var(--border);
+}
+
+#standings th,
+#standings td {
+  padding: 0.5rem 0.3rem;
+}
+
+#standings tbody td {
+  font-weight: 600;
+}
+
+th {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.col-num {
+  text-align: right;
+}
+
+.col-center {
+  text-align: center;
+}
+
+tbody tr:nth-child(even) {
+  background: var(--row-alt);
+}
+
+/* The current #1 in the filtered group — a light accent, not a full
+   celebration, so it doesn't fight with the live/stale-banner yellow. */
+#standings tbody tr.rank-leader {
+  background: #fffbeb;
+}
+
+#standings tbody tr.rank-leader td:first-child {
+  border-left: 3px solid #f59e0b;
+}
+
+.pending-active {
+  color: #b45309;
+}
+
+@media (prefers-color-scheme: dark) {
+  #standings tbody tr.rank-leader {
+    background: #422006;
+  }
+
+  #standings tbody tr.rank-leader td:first-child {
+    border-left-color: #92400e;
+  }
+
+  .pending-active {
+    color: #fbbf24;
+  }
+}
+
+.empty {
+  color: var(--muted);
+}
+
+.splash-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 1rem;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--fg);
+  background: var(--row-alt);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.splash-link:hover {
+  border-color: var(--fg);
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  padding: 0.5rem 0.25rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+
+.tab-button.active {
+  color: var(--fg);
+  border-bottom-color: var(--fg);
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+th.row-label {
+  text-transform: none;
+  font-size: inherit;
+  color: var(--fg);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Weekly matrix: keep the name column visible while scrolling horizontally
+   through the (often 20-40) game columns. */
+.sticky-col {
+  position: sticky;
+  left: 0;
+  background: var(--bg);
+  z-index: 1;
+}
+
+tbody tr:nth-child(even) .sticky-col {
+  background: var(--row-alt);
+}
+
+#weekly-content th {
+  vertical-align: bottom;
+}
+
+.game-detail {
+  font-weight: normal;
+  text-transform: none;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.game-live {
+  font-weight: bold;
+  text-transform: none;
+  font-size: 0.7rem;
+  color: #cf222e;
+}
+
+/* Highlights a live game's whole header column so it stands out while
+   scanning across the row of games, not just the small score text. Yellow
+   rather than red/green so it doesn't read as a win/loss signal. */
+th.game-header-live {
+  background: #fef3c7;
+  border-bottom: 2px solid #f59e0b;
+}
+
+@media (prefers-color-scheme: dark) {
+  .game-live {
+    color: #f87171;
+  }
+
+  th.game-header-live {
+    background: #422006;
+    border-bottom-color: #92400e;
+  }
+}
+
+@media (max-width: 480px) {
+  main {
+    padding: 1.25rem 0.75rem;
+  }
+
+  #standings th,
+  #standings td {
+    padding: 0.4rem 0.2rem;
+    font-size: 0.8rem;
+  }
+
+  #standings th {
+    font-size: 0.65rem;
+  }
+}
+
+.picker {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 1rem;
+}
+
+.picker select {
+  margin-left: 0.4rem;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.9rem;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+td.pick-won {
+  color: #1a7f37;
+}
+
+td.pick-lost {
+  color: #cf222e;
+}
+
+td.pick-push {
+  color: var(--muted);
+}
+
+td.pick-pending {
+  color: var(--muted);
+  font-style: italic;
+}
+
+td.pick-none {
+  color: var(--border);
+  text-align: center;
+}
+
+/* Live (ungraded) picks, colored by whether the pick is currently covering
+   its spread — italic so live picks read as provisional vs. settled ones.
+   The live game's column header is highlighted too (see game-header-live),
+   which is what actually draws the eye to the column. */
+td.pick-live-winning {
+  color: #1a7f37;
+  font-style: italic;
+}
+
+td.pick-live-losing {
+  color: #cf222e;
+  font-style: italic;
+}
+
+td.pick-live-tied {
+  color: var(--muted);
+  font-style: italic;
+}
+
+@media (prefers-color-scheme: dark) {
+  td.pick-won,
+  td.pick-live-winning {
+    color: #4ade80;
+  }
+
+  td.pick-lost,
+  td.pick-live-losing {
+    color: #f87171;
+  }
+}

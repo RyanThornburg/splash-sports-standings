@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Standings</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Standings</h1>
+      <p id="updated" class="updated"></p>
+      <p id="stale-banner" class="stale-banner" hidden></p>
+
+      <nav class="tabs">
+        <button class="tab-button active" data-tab="overall">Overall</button>
+        <button class="tab-button" data-tab="weekly">Weekly</button>
+        <button class="tab-button" data-tab="aggregates">Team Picks</button>
+      </nav>
+
+      <section id="tab-overall" class="tab-panel">
+        <div class="table-scroll">
+          <table id="standings">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Record</th>
+                <th class="col-num">Win%</th>
+                <th class="col-num">Pending</th>
+                <th id="tiebreak-header" class="col-num">Tiebreak</th>
+              </tr>
+            </thead>
+            <tbody id="standings-body"></tbody>
+          </table>
+        </div>
+        <p id="standings-empty" class="empty" hidden>No standings yet.</p>
+        <a id="splash-link" class="splash-link" href="#" target="_blank" rel="noopener" hidden>
+          View full contest on Splash Sports
+          <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M6 2h8v8h-1.5V4.56L4.06 13 3 11.94 11.44 3.5H6V2Z"
+            />
+          </svg>
+        </a>
+      </section>
+
+      <section id="tab-weekly" class="tab-panel" hidden>
+        <label class="picker">
+          Week:
+          <select id="weekly-select"></select>
+        </label>
+        <div id="weekly-content" class="table-scroll"></div>
+        <p id="weekly-empty" class="empty" hidden>No weekly data yet.</p>
+      </section>
+
+      <section id="tab-aggregates" class="tab-panel" hidden>
+        <label class="picker">
+          User:
+          <select id="aggregates-select"></select>
+        </label>
+        <div id="aggregates-content"></div>
+        <p id="aggregates-empty" class="empty" hidden>No pick data yet.</p>
+      </section>
+    </main>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

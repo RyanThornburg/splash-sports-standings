@@ -1,0 +1,10 @@
+node_modules/
+.wrangler/
+.dev.vars
+worker-configuration.d.ts
+
+# Local Claude Code tool-permission config — allowlisted commands have ended
+# up containing the real Worker subdomain, which we're deliberately keeping
+# out of git.
+.claude/
+

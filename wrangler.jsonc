@@ -1,0 +1,24 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "splash-sports-standings",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-09-06",
+	"observability": {
+		"enabled": true
+	},
+	"triggers": {
+		"crons": [
+			"*/5 * * * *"
+		]
+	},
+	"kv_namespaces": [
+		{
+			"binding": "SPLASH_STANDINGS_KV",
+			"id": "b74f9f301f8f4423ab2aa38692152b71"
+		}
+	],
+	"assets": {
+		"directory": "./public",
+		"binding": "ASSETS"
+	}
+}
