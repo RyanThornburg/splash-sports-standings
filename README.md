@@ -29,7 +29,7 @@ npm run dev          # wrangler dev
 npx wrangler dev --remote --test-scheduled
 ```
 
-`--test-scheduled` exposes `GET /__scheduled` to manually trigger the cron handler (which does the actual Splash Sports fetch + refresh) without waiting for the real 5-minute schedule.
+`--test-scheduled` exposes `GET /__scheduled` to manually trigger the cron handler (which does the actual Splash Sports fetch + refresh) without waiting for the schedule.
 
 ## Deploying
 
