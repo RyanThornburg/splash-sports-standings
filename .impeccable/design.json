@@ -383,6 +383,18 @@
         "darkValue": "#3f3418",
         "role": "accent",
         "displayName": "Trophy Row"
+      },
+      "win-bg": {
+        "canonical": "#fbf3d9",
+        "darkValue": "#2e2814",
+        "role": "accent",
+        "displayName": "Trophy Tint"
+      },
+      "win-ink": {
+        "canonical": "#8f6a00",
+        "darkValue": "#f2cd62",
+        "role": "accent",
+        "displayName": "Trophy Ink"
       }
     },
     "typographyMeta": {

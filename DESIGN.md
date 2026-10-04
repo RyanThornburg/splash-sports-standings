@@ -19,6 +19,8 @@ colors:
   live: "#f5a524"
   win: "#f2cd62"
   win-row: "#5a4b22"
+  win-bg: "#fbf3d9"
+  win-ink: "#8f6a00"
   live-ink: "#8a5300"
   live-bg: "#fdf1dc"
   good: "#1d7a45"
@@ -185,6 +187,8 @@ A cool neutral grey world with one charcoal material, one amber "now" signal, a 
 
 ### Named Rules
 **The Gold Is The Winner Rule.** Gold (`win`, `win-row`) marks only the leader: the week's rank-1 row on the Weekly board and the season's rank-1 row on Overall (ties share it, and nobody gets it at 0 wins). The row takes the `win-row` tint and a gold trophy icon replaces the rank number, with screen-reader text "Leading this week" / "Won the week" / "Season leader". Gold beats the "you" row lift when you are the leader. It is lighter and yellower than live amber and never appears without the trophy.
+
+**Quiet Tables Rule.** Season totals (Overall, Team Picks) are not scoreboards: they sit in a white ruled panel (`card`, `line` hairlines, 40px rows, max 720px wide) with semibold 17px condensed records and regular-weight grey numbers. The slate bar is reserved for Weekly's live board and score bugs. On these light tables the leader uses `win-bg` with a `win-ink` trophy, and your row a faint `page` tint.
 
 **The Amber Is Now Rule.** Amber marks time-sensitive state only: a game in progress (live dot, clock quarter label, live tile border) and the stale-data warning. Never decoration, never a status.
 

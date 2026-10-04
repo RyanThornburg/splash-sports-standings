@@ -45,6 +45,9 @@
      and yellower than live amber, and always with the trophy icon. */
   --win: #f2cd62;
   --win-row: #5a4b22;
+  /* Gold on light surfaces (Overall table). */
+  --win-bg: #fbf3d9;
+  --win-ink: #8f6a00;
   --live-ink: #8a5300;
   --live-bg: #fdf1dc;
   --good: #1d7a45;
@@ -71,6 +74,8 @@
     --bar-2: #30343c;
     --bar-3: #444954;
     --win-row: #3f3418;
+    --win-bg: #2e2814;
+    --win-ink: #f2cd62;
     --on-solid: #121317;
     --sel-bg: #eef0f3;
     --sel-ink: #121317;
@@ -395,13 +400,11 @@ h1 {
   background: var(--bar-3);
 }
 
-.board .row.win,
-.board-table tr.win {
+.board .row.win {
   background: var(--win-row);
 }
 
-.board .row.win .rk,
-.board-table tr.win td.rk {
+.board .row.win .rk {
   color: var(--win);
 }
 
@@ -437,33 +440,35 @@ h1 {
   text-underline-offset: 2px;
 }
 
-/* Overall tab: same charcoal board, as a real table. */
+/* Overall and Team Picks: a quiet ruled table on a white panel. The
+   scoreboard slate stays with Weekly; season totals read calmer. */
 .board-scroll {
+  max-width: 720px;
   overflow-x: auto;
+  border: 1px solid var(--line);
   border-radius: 10px;
+  background: var(--card);
 }
 
 .board-table {
   width: 100%;
   border-collapse: collapse;
-  background: var(--bar);
-  color: var(--on-bar);
+  color: var(--ink);
 }
 
 .board-table th,
 .board-table td {
   padding: 0 8px;
-  height: 44px;
+  height: 40px;
   text-align: left;
   white-space: nowrap;
-  border-top: 1px solid var(--bar-2);
+  border-top: 1px solid var(--line);
 }
 
 .board-table thead th {
-  height: 30px;
-  background: var(--bar-2);
+  height: 32px;
   border-top: 0;
-  color: var(--on-bar-2);
+  color: var(--ink-3);
   font: 600 12px var(--cond);
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -485,17 +490,17 @@ h1 {
 }
 
 .board-table td.rk {
-  font: 700 18px var(--cond);
-  color: var(--on-bar-2);
+  font: 600 16px var(--cond);
+  color: var(--ink-3);
 }
 
 .board-table td.rec {
-  font: 700 20px var(--cond);
+  font: 600 17px var(--cond);
 }
 
 .board-table td.num {
-  font: 600 18px var(--cond);
-  color: var(--on-bar-2);
+  font: 500 16px var(--cond);
+  color: var(--ink-2);
 }
 
 .board-table td.rk,
@@ -504,9 +509,17 @@ h1 {
   font-variant-numeric: tabular-nums;
 }
 
-
 .board-table tr.me {
-  background: var(--bar-3);
+  background: var(--page);
+}
+
+.board-table tr.win,
+.board-table tr.win.me {
+  background: var(--win-bg);
+}
+
+.board-table tr.win td.rk {
+  color: var(--win-ink);
 }
 
 .col-num {
@@ -1242,8 +1255,7 @@ h1 {
 }
 
 /* Winning beats "you" for the row tint; the You label still marks you. */
-.board .row.win.me,
-.board-table tr.win.me {
+.board .row.win.me {
   background: var(--win-row);
 }
 

@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "public/index.html"
+        ],
+        "createdAt": "2026-10-04T21:04:36.747Z",
+        "reason": "Claude triage: .board-scroll is a full-bleed ruled table in a bordered panel; cells carry 14px side padding and 40px rows, so text is inset even though the table element touches the border"
+      }
+    ]
+  }
+}
