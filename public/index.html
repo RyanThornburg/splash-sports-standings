@@ -3,34 +3,37 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Standings</title>
+    <title>Petz Pool</title>
+    <link rel="preload" href="/fonts/barlow-semi-condensed-700.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
     <main>
-      <h1>Standings</h1>
-      <p id="updated" class="updated"></p>
-      <p id="stale-banner" class="stale-banner" hidden></p>
+      <header class="site-header">
+        <h1>Petz Pool</h1>
+        <p id="updated" class="updated" aria-live="polite"></p>
+      </header>
+      <p id="stale-banner" class="stale-banner" role="status" hidden></p>
 
-      <nav class="tabs">
-        <button class="tab-button active" data-tab="overall">Overall</button>
-        <button class="tab-button" data-tab="weekly">Weekly</button>
-        <button class="tab-button" data-tab="aggregates">Team Picks</button>
-        <button class="tab-button" data-tab="trends">Trends</button>
+      <nav class="tabs" role="tablist" aria-label="Views">
+        <button class="tab-button active" role="tab" aria-selected="true" aria-controls="tab-overall" data-tab="overall">Overall</button>
+        <button class="tab-button" role="tab" aria-selected="false" aria-controls="tab-weekly" data-tab="weekly">Weekly</button>
+        <button class="tab-button" role="tab" aria-selected="false" aria-controls="tab-aggregates" data-tab="aggregates">Team Picks</button>
+        <button class="tab-button" role="tab" aria-selected="false" aria-controls="tab-trends" data-tab="trends">Trends</button>
       </nav>
 
-      <section id="tab-overall" class="tab-panel">
-        <div class="table-scroll">
-          <table id="standings">
+      <section id="tab-overall" class="tab-panel" role="tabpanel">
+        <div class="board-scroll">
+          <table id="standings" class="board-table">
             <thead>
               <tr>
                 <th>#</th>
-                <th>Rank</th>
                 <th>Name</th>
                 <th>Record</th>
                 <th class="col-num">Win%</th>
-                <th class="col-num">Pending</th>
-                <th id="tiebreak-header" class="col-num">Tiebreak</th>
+                <th id="left-header" class="col-num">Left</th>
+                <th class="col-num" title="Splash's overall rank in the whole pool">Pool</th>
+                <th id="tiebreak-header" class="col-num" title="Guess-the-score tiebreaker difference; lower is better">TB</th>
               </tr>
             </thead>
             <tbody id="standings-body"></tbody>
@@ -40,47 +43,92 @@
         <a id="splash-link" class="splash-link" href="#" target="_blank" rel="noopener" hidden>
           View full contest on Splash Sports
           <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
-            <path
-              fill="currentColor"
-              d="M6 2h8v8h-1.5V4.56L4.06 13 3 11.94 11.44 3.5H6V2Z"
-            />
+            <path fill="currentColor" d="M6 2h8v8h-1.5V4.56L4.06 13 3 11.94 11.44 3.5H6V2Z" />
           </svg>
         </a>
       </section>
 
-      <section id="tab-weekly" class="tab-panel" hidden>
-        <label class="picker">
-          Week:
-          <select id="weekly-select"></select>
-        </label>
-        <div id="weekly-content" class="table-scroll"></div>
-        <p id="weekly-empty" class="empty" hidden>No weekly data yet.</p>
+      <section id="tab-weekly" class="tab-panel" role="tabpanel" hidden>
+        <div class="weeknav">
+          <button type="button" id="week-prev" aria-label="Previous week">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+          </button>
+          <strong id="week-label"></strong>
+          <button type="button" id="week-next" aria-label="Next week">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
+          </button>
+        </div>
+
+        <section id="who-picker" class="who" hidden>
+          <h2 class="who-title">Which one are you?</h2>
+          <p class="who-note">Your picks get highlighted. This is saved on this device only.</p>
+          <div id="who-options" class="who-options"></div>
+        </section>
+
+        <p id="weekly-empty" class="empty" hidden>No picks for this week yet.</p>
+
+        <div id="weekly-body">
+          <h2 class="section-title">This week</h2>
+          <div class="week-top">
+          <div class="board" id="week-board"></div>
+
+          <section id="your-week" class="yw" aria-label="Your week" hidden>
+            <div class="yw-head">
+              <span class="yw-title" id="yw-title">Your week</span>
+              <div class="yw-stats" id="yw-stats"></div>
+            </div>
+            <div class="tiles" id="yw-tiles"></div>
+            <p class="yw-key" id="yw-key"></p>
+          </section>
+          </div>
+
+          <div class="segwrap" id="segwrap" hidden>
+            <div class="seg" role="group" aria-label="Show games">
+              <button type="button" data-mode="mine" id="seg-mine" aria-pressed="true"></button>
+              <button type="button" data-mode="all" id="seg-all" aria-pressed="false"></button>
+            </div>
+          </div>
+
+          <div id="sec-live" class="game-section" hidden>
+            <h2 class="section-title"><span class="livedot" aria-hidden="true"></span>Live <span class="count" id="count-live"></span></h2>
+            <p class="games-key" id="games-key"></p>
+            <div id="games-live"></div>
+          </div>
+          <div id="sec-later" class="game-section" hidden>
+            <h2 class="section-title">Later <span class="count" id="count-later"></span></h2>
+            <div id="games-later"></div>
+          </div>
+          <div id="sec-final" class="game-section" hidden>
+            <h2 class="section-title">Final <span class="count" id="count-final"></span></h2>
+            <div class="finals" id="games-final"></div>
+          </div>
+        </div>
       </section>
 
-      <section id="tab-aggregates" class="tab-panel" hidden>
+      <section id="tab-aggregates" class="tab-panel" role="tabpanel" hidden>
         <label class="picker">
-          User:
+          Friend
           <select id="aggregates-select"></select>
         </label>
-        <div id="aggregates-content"></div>
+        <div id="aggregates-content" class="board-scroll"></div>
         <p id="aggregates-empty" class="empty" hidden>No pick data yet.</p>
       </section>
 
-      <section id="tab-trends" class="tab-panel" hidden>
+      <section id="tab-trends" class="tab-panel" role="tabpanel" hidden>
         <label class="picker">
-          Week:
+          Week
           <select id="trends-select"></select>
         </label>
 
-        <h2 class="trends-heading">Our Group</h2>
+        <h2 class="section-title">Our group</h2>
         <div id="trends-group-content"></div>
         <p id="trends-group-empty" class="empty" hidden>No consensus or split picks this week.</p>
 
-        <h2 class="trends-heading">Pool - Most Picked This Week</h2>
+        <h2 class="section-title">Pool: most picked this week</h2>
         <div id="trends-pool-week-content"></div>
         <p id="trends-pool-week-empty" class="empty" hidden>No pool pick data yet.</p>
 
-        <h2 class="trends-heading">Pool - Most Picked This Season</h2>
+        <h2 class="section-title">Pool: most picked this season</h2>
         <div id="trends-pool-season-content"></div>
         <p id="trends-pool-season-empty" class="empty" hidden>No pool pick data yet.</p>
       </section>

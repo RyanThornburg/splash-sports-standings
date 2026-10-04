@@ -8,3 +8,10 @@ worker-configuration.d.ts
 # out of git.
 .claude/
 
+
+# Impeccable working files (screenshots, decision-page logs, live-mode state).
+# PRODUCT.md, DESIGN.md, .impeccable/design.json, surfaces/ and critique/ are kept.
+.impeccable/review/
+.impeccable/questions/
+.impeccable/live/
+.impeccable/hook.cache.json

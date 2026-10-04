@@ -4,12 +4,19 @@ import {
   computePoolTopPicks,
   computeSeasonPoolTopTeams,
   computeWeeklyPending,
+  defaultSlateId,
   FINISHED_STATUSES,
+  formatSpread,
   gameHeaderLines,
   isLiveGame,
   pickCellClass,
+  picksByGame,
+  pickStatus,
   recordText,
+  relativeTime,
   sortGameIds,
+  weeklySections,
+  weekStandings,
   winPct,
   withGroupRank,
 } from "../public/lib.js";
@@ -345,5 +352,122 @@ describe("computeSeasonPoolTopTeams", () => {
 
   it("tolerates a slate with no poolPickCounts (cached before this field existed)", () => {
     expect(computeSeasonPoolTopTeams([{ poolPickCounts: undefined }])).toEqual([]);
+  });
+});
+
+describe("formatSpread", () => {
+  it("signs positive spreads and keeps negatives", () => {
+    expect(formatSpread(3.5)).toBe("+3.5");
+    expect(formatSpread(-7)).toBe("-7");
+  });
+
+  it("calls a zero spread a pick'em and blanks a missing one", () => {
+    expect(formatSpread(0)).toBe("PK");
+    expect(formatSpread(null)).toBe("");
+  });
+});
+
+describe("relativeTime", () => {
+  const now = Date.parse("2026-10-04T20:00:00Z");
+
+  it("says just now under a minute", () => {
+    expect(relativeTime("2026-10-04T19:59:30Z", now)).toBe("just now");
+  });
+
+  it("counts minutes, then hours, then days", () => {
+    expect(relativeTime("2026-10-04T19:57:00Z", now)).toBe("3 min ago");
+    expect(relativeTime("2026-10-04T17:00:00Z", now)).toBe("3 hr ago");
+    expect(relativeTime("2026-10-03T19:00:00Z", now)).toBe("yesterday");
+    expect(relativeTime("2026-10-01T19:00:00Z", now)).toBe("3 days ago");
+  });
+
+  it("returns null with no timestamp", () => {
+    expect(relativeTime(null, now)).toBeNull();
+  });
+});
+
+describe("defaultSlateId", () => {
+  const withPicks = (id) => ({ id, users: { A: { picks: [pick()] } } });
+  const empty = (id) => ({ id, users: { A: { picks: [] } } });
+
+  it("skips trailing weeks nobody has picked yet", () => {
+    expect(defaultSlateId([withPicks("w4"), withPicks("w5"), empty("w6")])).toBe("w5");
+  });
+
+  it("falls back to the latest week when none have picks", () => {
+    expect(defaultSlateId([empty("w1"), { id: "w2" }])).toBe("w2");
+  });
+
+  it("returns null with no weeks", () => {
+    expect(defaultSlateId([])).toBeNull();
+  });
+});
+
+describe("weekStandings", () => {
+  const week = (wins, losses, potentialPoints = wins) => ({ wins, losses, ties: null, potentialPoints, picks: [] });
+
+  it("ranks by wins then fewest losses, sharing tied ranks", () => {
+    const rows = weekStandings({ A: week(6, 7), B: week(8, 6), C: week(6, 10), D: week(6, 7) });
+    expect(rows.map((r) => [r.handle, r.rankLabel])).toEqual([
+      ["B", "1"],
+      ["A", "T2"],
+      ["D", "T2"],
+      ["C", "4"],
+    ]);
+  });
+
+  it("reports picks left the same way as computeWeeklyPending", () => {
+    expect(weekStandings({ A: week(8, 6, 14) })[0].pending).toBe(6);
+  });
+});
+
+describe("pickStatus", () => {
+  it("prefers Splash's grade", () => {
+    expect(pickStatus(pick({ grade: "won" }), game())).toEqual({ tone: "good", live: false, label: "won" });
+    expect(pickStatus(pick({ grade: "losing" }), game())).toEqual({ tone: "bad", live: true, label: "not covering" });
+  });
+
+  it("works out live cover status from the score when ungraded", () => {
+    const live = game({
+      status: "in_progress",
+      home: { alias: "HOME", name: "Home Team", spread: -3.5, score: 21 },
+      away: { alias: "AWAY", name: "Away Team", spread: 3.5, score: 14 },
+    });
+    expect(pickStatus(pick(), live)).toEqual({ tone: "good", live: true, label: "covering" });
+  });
+
+  it("marks a not-yet-started pick as pending", () => {
+    expect(pickStatus(pick(), game())).toEqual({ tone: "pending", live: false, label: "not started" });
+  });
+});
+
+describe("picksByGame / weeklySections", () => {
+  const games = [
+    game({ gameId: "final-early", status: "finalized", startsAt: "2026-10-03T16:00:00Z" }),
+    game({ gameId: "final-late", status: "finished", startsAt: "2026-10-03T19:00:00Z" }),
+    game({ gameId: "live", status: "in_progress", startsAt: "2026-10-03T20:00:00Z" }),
+    game({ gameId: "later", status: "scheduled", startsAt: "2026-10-03T23:30:00Z" }),
+    game({ gameId: "unpicked", status: "in_progress", startsAt: "2026-10-03T20:00:00Z" }),
+  ];
+  const gamesById = new Map(games.map((g) => [g.gameId, g]));
+  const users = {
+    A: { picks: [pick({ gameId: "final-early" }), pick({ gameId: "live" })] },
+    B: { picks: [pick({ gameId: "live" }), pick({ gameId: "later" }), pick({ gameId: "final-late" })] },
+  };
+
+  it("groups every user's pick under its game", () => {
+    expect(picksByGame(users).get("live")?.map((p) => p.handle)).toEqual(["A", "B"]);
+  });
+
+  it("splits only picked games into live, later and final (newest final first)", () => {
+    const s = weeklySections(users, gamesById);
+    expect(s.live.map((g) => g.gameId)).toEqual(["live"]);
+    expect(s.later.map((g) => g.gameId)).toEqual(["later"]);
+    expect(s.final.map((g) => g.gameId)).toEqual(["final-late", "final-early"]);
+  });
+
+  it("limits to one user's games for My picks", () => {
+    const s = weeklySections(users, gamesById, "A");
+    expect([...s.live, ...s.later, ...s.final].map((g) => g.gameId)).toEqual(["live", "final-early"]);
   });
 });

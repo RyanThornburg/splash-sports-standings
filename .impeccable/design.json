@@ -1,0 +1,555 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-04T20:52:29+00:00",
+  "title": "Design System: Petz Pool",
+  "extensions": {
+    "colorMeta": {
+      "page": {
+        "role": "neutral",
+        "displayName": "Cool Grey Page",
+        "canonical": "#f2f3f5",
+        "darkValue": "#121317",
+        "tonalRamp": [
+          "oklch(15% 0.003 265)",
+          "oklch(25% 0.003 265)",
+          "oklch(37% 0.003 265)",
+          "oklch(49% 0.003 265)",
+          "oklch(61% 0.003 265)",
+          "oklch(73% 0.003 265)",
+          "oklch(85% 0.003 265)",
+          "oklch(95% 0.003 265)"
+        ]
+      },
+      "card": {
+        "role": "neutral",
+        "displayName": "Panel White",
+        "canonical": "#ffffff",
+        "darkValue": "#1b1d22",
+        "tonalRamp": [
+          "oklch(15% 0.000 90)",
+          "oklch(25% 0.000 90)",
+          "oklch(37% 0.000 90)",
+          "oklch(49% 0.000 90)",
+          "oklch(61% 0.000 90)",
+          "oklch(73% 0.000 90)",
+          "oklch(85% 0.000 90)",
+          "oklch(95% 0.000 90)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#e1e3e8",
+        "darkValue": "#2c2f36",
+        "tonalRamp": [
+          "oklch(15% 0.007 269)",
+          "oklch(25% 0.007 269)",
+          "oklch(37% 0.007 269)",
+          "oklch(49% 0.007 269)",
+          "oklch(61% 0.007 269)",
+          "oklch(73% 0.007 269)",
+          "oklch(85% 0.007 269)",
+          "oklch(95% 0.007 269)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#1d1f24",
+        "darkValue": "#eef0f3",
+        "tonalRamp": [
+          "oklch(15% 0.010 268)",
+          "oklch(25% 0.010 268)",
+          "oklch(37% 0.010 268)",
+          "oklch(49% 0.010 268)",
+          "oklch(61% 0.010 268)",
+          "oklch(73% 0.010 268)",
+          "oklch(85% 0.010 268)",
+          "oklch(95% 0.010 268)"
+        ]
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Ink 2",
+        "canonical": "#555b66",
+        "darkValue": "#a9aeb8",
+        "tonalRamp": [
+          "oklch(15% 0.019 263)",
+          "oklch(25% 0.019 263)",
+          "oklch(37% 0.019 263)",
+          "oklch(49% 0.019 263)",
+          "oklch(61% 0.019 263)",
+          "oklch(73% 0.019 263)",
+          "oklch(85% 0.019 263)",
+          "oklch(95% 0.019 263)"
+        ]
+      },
+      "ink-3": {
+        "role": "neutral",
+        "displayName": "Ink 3",
+        "canonical": "#6e747f",
+        "darkValue": "#8f949e",
+        "tonalRamp": [
+          "oklch(15% 0.019 263)",
+          "oklch(25% 0.019 263)",
+          "oklch(37% 0.019 263)",
+          "oklch(49% 0.019 263)",
+          "oklch(61% 0.019 263)",
+          "oklch(73% 0.019 263)",
+          "oklch(85% 0.019 263)",
+          "oklch(95% 0.019 263)"
+        ]
+      },
+      "bar": {
+        "role": "primary",
+        "displayName": "Broadcast Charcoal",
+        "canonical": "#1d1f24",
+        "darkValue": "#24272e",
+        "tonalRamp": [
+          "oklch(15% 0.010 268)",
+          "oklch(25% 0.010 268)",
+          "oklch(37% 0.010 268)",
+          "oklch(49% 0.010 268)",
+          "oklch(61% 0.010 268)",
+          "oklch(73% 0.010 268)",
+          "oklch(85% 0.010 268)",
+          "oklch(95% 0.010 268)"
+        ]
+      },
+      "bar-2": {
+        "role": "primary",
+        "displayName": "Charcoal Strip",
+        "canonical": "#2a2d34",
+        "darkValue": "#30343c",
+        "tonalRamp": [
+          "oklch(15% 0.013 267)",
+          "oklch(25% 0.013 267)",
+          "oklch(37% 0.013 267)",
+          "oklch(49% 0.013 267)",
+          "oklch(61% 0.013 267)",
+          "oklch(73% 0.013 267)",
+          "oklch(85% 0.013 267)",
+          "oklch(95% 0.013 267)"
+        ]
+      },
+      "bar-3": {
+        "role": "primary",
+        "displayName": "Charcoal Lift",
+        "canonical": "#3a3e48",
+        "darkValue": "#444954",
+        "tonalRamp": [
+          "oklch(15% 0.018 268)",
+          "oklch(25% 0.018 268)",
+          "oklch(37% 0.018 268)",
+          "oklch(49% 0.018 268)",
+          "oklch(61% 0.018 268)",
+          "oklch(73% 0.018 268)",
+          "oklch(85% 0.018 268)",
+          "oklch(95% 0.018 268)"
+        ]
+      },
+      "on-bar": {
+        "role": "primary",
+        "displayName": "Bar White",
+        "canonical": "#ffffff",
+        "darkValue": "#ffffff",
+        "tonalRamp": [
+          "oklch(15% 0.000 90)",
+          "oklch(25% 0.000 90)",
+          "oklch(37% 0.000 90)",
+          "oklch(49% 0.000 90)",
+          "oklch(61% 0.000 90)",
+          "oklch(73% 0.000 90)",
+          "oklch(85% 0.000 90)",
+          "oklch(95% 0.000 90)"
+        ]
+      },
+      "on-bar-2": {
+        "role": "primary",
+        "displayName": "Bar Grey",
+        "canonical": "#aeb3bc",
+        "darkValue": "#aeb3bc",
+        "tonalRamp": [
+          "oklch(15% 0.014 262)",
+          "oklch(25% 0.014 262)",
+          "oklch(37% 0.014 262)",
+          "oklch(49% 0.014 262)",
+          "oklch(61% 0.014 262)",
+          "oklch(73% 0.014 262)",
+          "oklch(85% 0.014 262)",
+          "oklch(95% 0.014 262)"
+        ]
+      },
+      "on-solid": {
+        "role": "neutral",
+        "displayName": "On Solid",
+        "canonical": "#ffffff",
+        "darkValue": "#121317",
+        "tonalRamp": [
+          "oklch(15% 0.000 90)",
+          "oklch(25% 0.000 90)",
+          "oklch(37% 0.000 90)",
+          "oklch(49% 0.000 90)",
+          "oklch(61% 0.000 90)",
+          "oklch(73% 0.000 90)",
+          "oklch(85% 0.000 90)",
+          "oklch(95% 0.000 90)"
+        ]
+      },
+      "sel-bg": {
+        "role": "neutral",
+        "displayName": "Selection Ground",
+        "canonical": "#1d1f24",
+        "darkValue": "#eef0f3",
+        "tonalRamp": [
+          "oklch(15% 0.010 268)",
+          "oklch(25% 0.010 268)",
+          "oklch(37% 0.010 268)",
+          "oklch(49% 0.010 268)",
+          "oklch(61% 0.010 268)",
+          "oklch(73% 0.010 268)",
+          "oklch(85% 0.010 268)",
+          "oklch(95% 0.010 268)"
+        ]
+      },
+      "sel-ink": {
+        "role": "neutral",
+        "displayName": "Selection Ink",
+        "canonical": "#ffffff",
+        "darkValue": "#121317",
+        "tonalRamp": [
+          "oklch(15% 0.000 90)",
+          "oklch(25% 0.000 90)",
+          "oklch(37% 0.000 90)",
+          "oklch(49% 0.000 90)",
+          "oklch(61% 0.000 90)",
+          "oklch(73% 0.000 90)",
+          "oklch(85% 0.000 90)",
+          "oklch(95% 0.000 90)"
+        ]
+      },
+      "live": {
+        "role": "secondary",
+        "displayName": "Clock Amber",
+        "canonical": "#f5a524",
+        "darkValue": "#f5a524",
+        "tonalRamp": [
+          "oklch(15% 0.158 72)",
+          "oklch(25% 0.158 72)",
+          "oklch(37% 0.158 72)",
+          "oklch(49% 0.158 72)",
+          "oklch(61% 0.158 72)",
+          "oklch(73% 0.158 72)",
+          "oklch(85% 0.158 72)",
+          "oklch(95% 0.158 72)"
+        ]
+      },
+      "live-ink": {
+        "role": "secondary",
+        "displayName": "Amber Ink",
+        "canonical": "#8a5300",
+        "darkValue": "#f5b84d",
+        "tonalRamp": [
+          "oklch(15% 0.109 67)",
+          "oklch(25% 0.109 67)",
+          "oklch(37% 0.109 67)",
+          "oklch(49% 0.109 67)",
+          "oklch(61% 0.109 67)",
+          "oklch(73% 0.109 67)",
+          "oklch(85% 0.109 67)",
+          "oklch(95% 0.109 67)"
+        ]
+      },
+      "live-bg": {
+        "role": "secondary",
+        "displayName": "Amber Tint",
+        "canonical": "#fdf1dc",
+        "darkValue": "#33270f",
+        "tonalRamp": [
+          "oklch(15% 0.031 82)",
+          "oklch(25% 0.031 82)",
+          "oklch(37% 0.031 82)",
+          "oklch(49% 0.031 82)",
+          "oklch(61% 0.031 82)",
+          "oklch(73% 0.031 82)",
+          "oklch(85% 0.031 82)",
+          "oklch(95% 0.031 82)"
+        ]
+      },
+      "good": {
+        "role": "secondary",
+        "displayName": "Covering Green",
+        "canonical": "#1d7a45",
+        "darkValue": "#5cc98a",
+        "tonalRamp": [
+          "oklch(15% 0.119 153)",
+          "oklch(25% 0.119 153)",
+          "oklch(37% 0.119 153)",
+          "oklch(49% 0.119 153)",
+          "oklch(61% 0.119 153)",
+          "oklch(73% 0.119 153)",
+          "oklch(85% 0.119 153)",
+          "oklch(95% 0.119 153)"
+        ]
+      },
+      "good-bg": {
+        "role": "secondary",
+        "displayName": "Green Tint",
+        "canonical": "#e5f3ea",
+        "darkValue": "#16301f",
+        "tonalRamp": [
+          "oklch(15% 0.019 158)",
+          "oklch(25% 0.019 158)",
+          "oklch(37% 0.019 158)",
+          "oklch(49% 0.019 158)",
+          "oklch(61% 0.019 158)",
+          "oklch(73% 0.019 158)",
+          "oklch(85% 0.019 158)",
+          "oklch(95% 0.019 158)"
+        ]
+      },
+      "bad": {
+        "role": "secondary",
+        "displayName": "Not-Covering Red",
+        "canonical": "#b8352b",
+        "darkValue": "#f08a80",
+        "tonalRamp": [
+          "oklch(15% 0.169 29)",
+          "oklch(25% 0.169 29)",
+          "oklch(37% 0.169 29)",
+          "oklch(49% 0.169 29)",
+          "oklch(61% 0.169 29)",
+          "oklch(73% 0.169 29)",
+          "oklch(85% 0.169 29)",
+          "oklch(95% 0.169 29)"
+        ]
+      },
+      "bad-bg": {
+        "role": "secondary",
+        "displayName": "Red Tint",
+        "canonical": "#fbe9e7",
+        "darkValue": "#3a1c1a",
+        "tonalRamp": [
+          "oklch(15% 0.020 25)",
+          "oklch(25% 0.020 25)",
+          "oklch(37% 0.020 25)",
+          "oklch(49% 0.020 25)",
+          "oklch(61% 0.020 25)",
+          "oklch(73% 0.020 25)",
+          "oklch(85% 0.020 25)",
+          "oklch(95% 0.020 25)"
+        ]
+      },
+      "push-bg": {
+        "role": "neutral",
+        "displayName": "Push Tint",
+        "canonical": "#eceef1",
+        "darkValue": "#2a2d33",
+        "tonalRamp": [
+          "oklch(15% 0.005 258)",
+          "oklch(25% 0.005 258)",
+          "oklch(37% 0.005 258)",
+          "oklch(49% 0.005 258)",
+          "oklch(61% 0.005 258)",
+          "oklch(73% 0.005 258)",
+          "oklch(85% 0.005 258)",
+          "oklch(95% 0.005 258)"
+        ]
+      },
+      "accent": {
+        "role": "tertiary",
+        "displayName": "Popularity Blue",
+        "canonical": "#3a6fd8",
+        "darkValue": "#7ea3f0",
+        "tonalRamp": [
+          "oklch(15% 0.171 262)",
+          "oklch(25% 0.171 262)",
+          "oklch(37% 0.171 262)",
+          "oklch(49% 0.171 262)",
+          "oklch(61% 0.171 262)",
+          "oklch(73% 0.171 262)",
+          "oklch(85% 0.171 262)",
+          "oklch(95% 0.171 262)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Live scores in a score bug (20px in finals)."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "The Petz Pool wordmark; 18px for week label and picker title."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Uppercase section titles, tabs, switch segments."
+      },
+      "numeral": {
+        "displayName": "Numeral",
+        "purpose": "Records, ranks, team abbreviations, stat values; tabular."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Notes, keys, empty states, running text."
+      },
+      "name": {
+        "displayName": "Name",
+        "purpose": "Splash handles on the board and chips; never condensed."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Column heads, clock quarter, Your pick tag, stat units."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "state-fade",
+        "value": "background-color 0.15s ease-out, color 0.15s ease-out",
+        "purpose": "Tabs, switch segments and chips only; gated on prefers-reduced-motion: no-preference."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "narrow",
+        "value": "max-width: 420px",
+        "purpose": "Tighter tab labels."
+      },
+      {
+        "name": "wide",
+        "value": "min-width: 900px",
+        "purpose": "Two-column score bugs and finals; standings and your week side by side."
+      }
+    ],
+    "themes": {
+      "dark": "prefers-color-scheme: dark on :root:not([data-theme=light]); per-token darkValue in colorMeta. Page goes near-black, bars stay charcoal, sel-bg/sel-ink invert."
+    },
+    "icons": {
+      "check": "<svg viewBox=\"0 0 12 12\" width=\"12\" height=\"12\" aria-hidden=\"true\"><path d=\"M2.2 6.4 4.8 9 9.8 3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>",
+      "x": "<svg viewBox=\"0 0 12 12\" width=\"12\" height=\"12\" aria-hidden=\"true\"><path d=\"M3 3l6 6M9 3 3 9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/></svg>",
+      "up": "<svg viewBox=\"0 0 12 12\" width=\"12\" height=\"12\" aria-hidden=\"true\"><path d=\"M6 2.2 10.4 9.6H1.6Z\" fill=\"currentColor\"/></svg>",
+      "down": "<svg viewBox=\"0 0 12 12\" width=\"12\" height=\"12\" aria-hidden=\"true\"><path d=\"M6 9.8 1.6 2.4h8.8Z\" fill=\"currentColor\"/></svg>",
+      "ring": "<svg viewBox=\"0 0 12 12\" width=\"12\" height=\"12\" aria-hidden=\"true\"><circle cx=\"6\" cy=\"6\" r=\"3.6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/></svg>",
+      "dash": "<svg viewBox=\"0 0 12 12\" width=\"12\" height=\"12\" aria-hidden=\"true\"><path d=\"M2.5 6h7\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/></svg>"
+    }
+  },
+  "components": [
+    {
+      "name": "Score Bug",
+      "kind": "custom",
+      "refersTo": "score-bug",
+      "description": "One game as a broadcast scoreboard bar: two team cells and a clock cell; amber quarter when live.",
+      "html": "<div class=\"ds-bug\"><div class=\"ds-team\"><span><span class=\"ds-rank\">24</span><span class=\"ds-abbr\">UK</span></span><span class=\"ds-sprd\">+2.5</span><span class=\"ds-score\">15</span></div><div class=\"ds-team ds-trail\"><span><span class=\"ds-abbr\">SCAR</span></span><span class=\"ds-sprd\">-2.5</span><span class=\"ds-score\">14</span></div><div class=\"ds-clock\"><span class=\"ds-q\">2nd</span><span class=\"ds-t\">8:41</span></div></div>",
+      "css": ".ds-bug{display:grid;grid-template-columns:1fr 1fr 70px;height:58px;overflow:hidden;border-radius:10px;background:var(--bar,#1d1f24);color:var(--on-bar,#fff)}.ds-team{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;min-width:0;padding:0 12px;border-right:1px solid var(--bar-2,#2a2d34)}.ds-abbr{font:700 21px/1 var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);letter-spacing:.02em}.ds-rank{margin-right:2px;font:600 12px/1 var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);color:var(--on-bar-2,#aeb3bc);vertical-align:top}.ds-sprd{font:500 13px/1 var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);color:var(--on-bar-2,#aeb3bc)}.ds-score{font:700 32px/1 var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);text-align:right;font-variant-numeric:tabular-nums}.ds-trail .ds-score{color:var(--on-bar-2,#aeb3bc)}.ds-clock{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:var(--bar-2,#2a2d34)}.ds-q{font:700 12px/1 var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);letter-spacing:.08em;text-transform:uppercase;color:var(--live,#f5a524)}.ds-t{font:600 17px/1 var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Pick Chip (friend)",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Outlined pill for a friend's pick; outline and text take good/bad, always with an icon.",
+      "html": "<span class=\"ds-chip ds-good\"><svg viewBox=\"0 0 12 12\" width=\"12\" height=\"12\" aria-hidden=\"true\"><path d=\"M6 2.2 10.4 9.6H1.6Z\" fill=\"currentColor\"/></svg>Ken-grapes</span> <span class=\"ds-chip ds-bad\"><svg viewBox=\"0 0 12 12\" width=\"12\" height=\"12\" aria-hidden=\"true\"><path d=\"M6 9.8 1.6 2.4h8.8Z\" fill=\"currentColor\"/></svg>NMEPitt</span> <span class=\"ds-chip\"><svg viewBox=\"0 0 12 12\" width=\"12\" height=\"12\" aria-hidden=\"true\"><circle cx=\"6\" cy=\"6\" r=\"3.6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/></svg>lucky_dog</span>",
+      "css": ".ds-chip{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 9px 0 7px;border:1.5px solid var(--line,#e1e3e8);border-radius:13px;background:transparent;color:var(--ink-2,#555b66);font:500 13px system-ui,sans-serif;white-space:nowrap;transition:background-color .15s ease-out,color .15s ease-out}.ds-chip.ds-good{border-color:var(--good,#1d7a45);color:var(--good,#1d7a45)}.ds-chip.ds-bad{border-color:var(--bad,#b8352b);color:var(--bad,#b8352b)}"
+    },
+    {
+      "name": "Pick Chip (you)",
+      "kind": "chip",
+      "refersTo": "chip-me",
+      "description": "Your own pick is a solid pill so it is findable among friends' outlines.",
+      "html": "<span class=\"ds-chipme\"><svg viewBox=\"0 0 12 12\" width=\"12\" height=\"12\" aria-hidden=\"true\"><circle cx=\"6\" cy=\"6\" r=\"3.6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/></svg>Rattly</span> <span class=\"ds-chipme ds-good\"><svg viewBox=\"0 0 12 12\" width=\"12\" height=\"12\" aria-hidden=\"true\"><path d=\"M6 2.2 10.4 9.6H1.6Z\" fill=\"currentColor\"/></svg>Rattly</span> <span class=\"ds-chipme ds-bad\"><svg viewBox=\"0 0 12 12\" width=\"12\" height=\"12\" aria-hidden=\"true\"><path d=\"M6 9.8 1.6 2.4h8.8Z\" fill=\"currentColor\"/></svg>Rattly</span>",
+      "css": ".ds-chipme{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 9px 0 7px;border:1.5px solid var(--bar,#1d1f24);border-radius:13px;background:var(--bar,#1d1f24);color:var(--on-bar,#fff);font:700 13px system-ui,sans-serif;white-space:nowrap}.ds-chipme.ds-good{border-color:var(--good,#1d7a45);background:var(--good,#1d7a45);color:var(--on-solid,#fff)}.ds-chipme.ds-bad{border-color:var(--bad,#b8352b);background:var(--bad,#b8352b);color:var(--on-solid,#fff)}"
+    },
+    {
+      "name": "Pick Tiles",
+      "kind": "custom",
+      "refersTo": "tile-good",
+      "description": "Your week's strip: one tile per pick, tinted by result, amber border when live.",
+      "html": "<div class=\"ds-tiles\"><a class=\"ds-tile ds-good\" href=\"#\"><svg viewBox=\"0 0 12 12\" width=\"12\" height=\"12\" aria-hidden=\"true\"><path d=\"M2.2 6.4 4.8 9 9.8 3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg><span class=\"ds-a\">PITT</span></a><a class=\"ds-tile ds-bad\" href=\"#\"><svg viewBox=\"0 0 12 12\" width=\"12\" height=\"12\" aria-hidden=\"true\"><path d=\"M3 3l6 6M9 3 3 9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/></svg><span class=\"ds-a\">PSU</span></a><a class=\"ds-tile ds-live ds-livegood\" href=\"#\"><svg viewBox=\"0 0 12 12\" width=\"12\" height=\"12\" aria-hidden=\"true\"><path d=\"M6 2.2 10.4 9.6H1.6Z\" fill=\"currentColor\"/></svg><span class=\"ds-a\">LT</span></a><a class=\"ds-tile ds-pending\" href=\"#\"><svg viewBox=\"0 0 12 12\" width=\"12\" height=\"12\" aria-hidden=\"true\"><circle cx=\"6\" cy=\"6\" r=\"3.6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/></svg><span class=\"ds-a\">USF</span></a></div>",
+      "css": ".ds-tiles{display:grid;grid-template-columns:repeat(4,56px);gap:4px}.ds-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:44px;border:1.5px solid transparent;border-radius:7px;color:var(--ink,#1d1f24);text-decoration:none}.ds-a{font:700 12px/1 var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif)}.ds-good{background:var(--good-bg,#e5f3ea);color:var(--good,#1d7a45)}.ds-bad{background:var(--bad-bg,#fbe9e7);color:var(--bad,#b8352b)}.ds-live{border-color:var(--live,#f5a524);background:var(--card,#fff)}.ds-livegood svg{color:var(--good,#1d7a45)}.ds-pending{border-color:var(--line,#e1e3e8);color:var(--ink-2,#555b66)}.ds-tile:focus-visible{outline:2px solid var(--ink,#1d1f24);outline-offset:2px}"
+    },
+    {
+      "name": "Standings Board",
+      "kind": "card",
+      "refersTo": "standings-board",
+      "description": "Charcoal grid of the group's standings; your row lifted to bar-3.",
+      "html": "<div class=\"ds-board\"><div class=\"ds-head\"><span>#</span><span>Name</span><span>W-L</span><span>Left</span></div><div class=\"ds-row ds-me\"><span class=\"ds-rk\">1</span><span class=\"ds-name\">Rattly</span><span class=\"ds-rec\">8-6</span><span class=\"ds-left\">6</span></div><div class=\"ds-row\"><span class=\"ds-rk\">2</span><span class=\"ds-name\">EMILYK24</span><span class=\"ds-rec\">7-6</span><span class=\"ds-left\">7</span></div></div>",
+      "css": ".ds-board{background:var(--bar,#1d1f24);color:var(--on-bar,#fff);border-radius:10px;overflow:hidden;max-width:420px}.ds-head,.ds-row{display:grid;grid-template-columns:40px minmax(0,1fr) 64px 52px;align-items:center;padding:0 14px}.ds-head span:nth-child(n+3),.ds-row span:nth-child(n+3){text-align:right}.ds-head{height:30px;background:var(--bar-2,#2a2d34);color:var(--on-bar-2,#aeb3bc);font:600 12px var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);letter-spacing:.08em;text-transform:uppercase}.ds-row{min-height:44px;border-top:1px solid var(--bar-2,#2a2d34)}.ds-me{background:var(--bar-3,#3a3e48)}.ds-rk{font:700 18px var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);color:var(--on-bar-2,#aeb3bc)}.ds-me .ds-rk{color:var(--on-bar,#fff)}.ds-name{font:500 15px system-ui,sans-serif}.ds-rec{font:700 20px var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);font-variant-numeric:tabular-nums}.ds-left{font:600 18px var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);color:var(--on-bar-2,#aeb3bc);font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Tabs",
+      "kind": "nav",
+      "refersTo": "tab",
+      "description": "White tray of equal condensed uppercase tabs; selected uses sel-bg/sel-ink.",
+      "html": "<nav class=\"ds-tabs\" role=\"tablist\"><button class=\"ds-tab\" role=\"tab\">Overall</button><button class=\"ds-tab ds-active\" role=\"tab\" aria-selected=\"true\">Weekly</button><button class=\"ds-tab\" role=\"tab\">Team Picks</button><button class=\"ds-tab\" role=\"tab\">Trends</button></nav>",
+      "css": ".ds-tabs{display:flex;gap:4px;padding:4px;background:var(--card,#fff);border:1px solid var(--line,#e1e3e8);border-radius:10px}.ds-tab{flex:1 1 0;min-height:40px;padding:0 8px;border:0;border-radius:7px;background:none;cursor:pointer;font:700 15px var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2,#555b66);transition:background-color .15s ease-out,color .15s ease-out}.ds-tab:hover{color:var(--ink,#1d1f24)}.ds-tab:focus-visible{outline:2px solid var(--ink,#1d1f24);outline-offset:2px}.ds-tab.ds-active{background:var(--sel-bg,#1d1f24);color:var(--sel-ink,#fff)}"
+    },
+    {
+      "name": "Select",
+      "kind": "input",
+      "refersTo": "panel",
+      "description": "The Team Picks / Trends picker select (restyle only).",
+      "html": "<label class=\"ds-picker\">Week <select class=\"ds-select\"><option>Week 5</option></select></label>",
+      "css": ".ds-picker{display:flex;align-items:center;gap:10px;font:700 15px var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2,#555b66)}.ds-select{min-height:40px;padding:0 10px;border:1px solid var(--line,#e1e3e8);border-radius:8px;background:var(--card,#fff);font:500 15px system-ui,sans-serif;letter-spacing:0;text-transform:none;color:var(--ink,#1d1f24)}.ds-select:focus-visible{outline:2px solid var(--ink,#1d1f24);outline-offset:2px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Saturday Score Bug",
+    "overview": "Petz Pool looks like the scoreboard strip in the corner of a college football broadcast, not a spreadsheet and not a rounded-card sports app. Each game is one charcoal bar with condensed white numerals, a clock cell on the right, and the friends who picked each side hanging beneath it as pills. Standings use the same charcoal bar material, so the group's ranking and the games read as one broadcast package.\n\nThe page around the bars is quiet: a cool light grey with white, hairline-bordered panels for \"your week\", the finals list, and the controls. Color is rationed by meaning. Amber means \"happening now\", green and red mean a pick's status and never appear without a drawn icon, and blue only measures popularity. The dark theme swaps the page to near-black and keeps the bars charcoal, so the bugs stay the brightest-edged objects on screen.\n\nDensity is tuned for a phone held one-handed during a game: 40-44px touch rows, a 10-across tile strip for the week's picks, and a sticky My picks / All games switch. Only the Weekly tab and the shared shell were built in this world. Overall, Team Picks and Trends got the token restyle only (charcoal tables, condensed labels, the shared palette); their structural redesign is deferred, so treat their layouts as provisional, not as the pattern to copy.",
+    "keyCharacteristics": [
+      "Charcoal broadcast bars with condensed tabular numerals for every score, record and count.",
+      "Platform system-ui for people's handles and running text.",
+      "Amber is the \"now\" color; green/red are pick status only, always with an icon.",
+      "Your own pick is solid; friends' picks are outlined.",
+      "Flat surfaces; depth comes from tone (charcoal on grey), not shadows."
+    ],
+    "rules": [
+      {
+        "name": "The Amber Is Now Rule",
+        "body": "Amber marks time-sensitive state only: a game in progress (live dot, clock quarter label, live tile border) and the stale-data warning. Never decoration, never a status.",
+        "section": "colors"
+      },
+      {
+        "name": "The Never Color Alone Rule",
+        "body": "Green and red appear only on pick status and always beside a drawn SVG icon: check (won), x (lost), up triangle (covering), down triangle (not covering), dash (push or tied), ring (not started). A legend of the same icons accompanies the tile strip and the live section.",
+        "section": "colors"
+      },
+      {
+        "name": "The Blue Is Count Rule",
+        "body": "The accent blue measures popularity and nothing else. Season-long pool trends carry no status color at all.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Voices Rule",
+        "body": "Condensed for numerals, abbreviations, labels and uppercase titles; system-ui for names and body. Never set a handle in the condensed face, and never set a score in the sans.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Numerals Rule",
+        "body": "`tabular-nums` goes on numeric cells only (scores, records, ranks, counts, clock, meter values), so columns align during live updates. Text cells don't get it.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tone Not Shadow Rule",
+        "body": "Lift something by stepping its tone (bar to bar-2 to bar-3, page to card), never with a drop shadow.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** build new scoreboard content from the charcoal bar material with condensed tabular numerals.",
+      "**Do** pair every green or red with one of the six drawn icons (check, x, up, down, dash, ring).",
+      "**Do** keep your own pick solid and friends' picks outlined.",
+      "**Do** use sel-bg/sel-ink for any selected tab or segment so it inverts correctly in dark.",
+      "**Do** step tone (bar-2, bar-3) to separate or lift, and keep corners at 10px outer / 7px inner.",
+      "**Do** keep touch targets at 40-44px."
+    ],
+    "donts": [
+      "**Don't** use amber for anything but live/now state and the stale-data warning.",
+      "**Don't** use green or red for decoration, emphasis or brand; they mean pick status.",
+      "**Don't** use the accent blue for status, or green/red for popularity.",
+      "**Don't** set handles in the condensed face or numerals in the sans.",
+      "**Don't** add drop shadows.",
+      "**Don't** treat Overall, Team Picks or Trends layouts as established patterns; they carry the tokens only and await their own redesign."
+    ]
+  }
+}

@@ -191,3 +191,119 @@ export function sortGameIds(gameIds, gamesById) {
     return timeDiff !== 0 ? timeDiff : gameA.home.alias.localeCompare(gameB.home.alias);
   });
 }
+
+// ---- Weekly (score-bug view) ----
+
+export function formatSpread(spread) {
+  if (spread == null) return "";
+  if (spread === 0) return "PK";
+  return spread > 0 ? `+${spread}` : `${spread}`;
+}
+
+// "Updated 3 min ago" style freshness. Falls back to a clock time past a day.
+export function relativeTime(iso, nowMs = Date.now()) {
+  if (!iso) return null;
+  const diffMin = Math.floor((nowMs - new Date(iso).getTime()) / 60_000);
+  if (diffMin < 1) return "just now";
+  if (diffMin < 60) return `${diffMin} min ago`;
+  const hours = Math.floor(diffMin / 60);
+  if (hours < 24) return `${hours} hr ago`;
+  const days = Math.floor(hours / 24);
+  return days === 1 ? "yesterday" : `${days} days ago`;
+}
+
+// The week Weekly opens on: the latest slate where any of our users actually
+// has picks (so between weekends it lands on last week's results rather than
+// an empty upcoming slate), falling back to the latest slate at all.
+export function defaultSlateId(slates) {
+  if (!slates || slates.length === 0) return null;
+  for (let i = slates.length - 1; i >= 0; i--) {
+    const users = Object.values(slates[i].users ?? {});
+    if (users.some((u) => (u.picks ?? []).length > 0)) return slates[i].id;
+  }
+  return slates[slates.length - 1].id;
+}
+
+// This week's standings among our users: most wins first, then fewest
+// losses. Users level on both share a rank, labelled "T2" etc.
+export function weekStandings(users) {
+  const rows = Object.entries(users ?? {}).map(([handle, week]) => ({
+    handle,
+    wins: week.wins ?? 0,
+    losses: week.losses ?? 0,
+    ties: week.ties ?? 0,
+    pending: computeWeeklyPending(week),
+  }));
+  rows.sort((a, b) => b.wins - a.wins || a.losses - b.losses || a.handle.localeCompare(b.handle));
+
+  let rank = 0;
+  rows.forEach((row, i) => {
+    const prev = rows[i - 1];
+    if (!prev || prev.wins !== row.wins || prev.losses !== row.losses) rank = i + 1;
+    row.rank = rank;
+  });
+  for (const row of rows) {
+    const tied = rows.filter((r) => r.rank === row.rank).length > 1;
+    row.rankLabel = tied ? `T${row.rank}` : String(row.rank);
+  }
+  return rows;
+}
+
+// Collapses pickCellClass into what a chip or tile needs to show: a tone
+// (good/bad/push/pending), whether the game is still being played, and a
+// plain-words label for screen readers and tooltips.
+export function pickStatus(pick, game) {
+  const cls = pickCellClass(pick, game);
+  switch (cls) {
+    case "pick-won":
+      return { tone: "good", live: false, label: "won" };
+    case "pick-lost":
+      return { tone: "bad", live: false, label: "lost" };
+    case "pick-push":
+      return { tone: "push", live: false, label: "push" };
+    case "pick-live-winning":
+      return { tone: "good", live: true, label: "covering" };
+    case "pick-live-losing":
+      return { tone: "bad", live: true, label: "not covering" };
+    case "pick-live-tied":
+      return { tone: "push", live: true, label: "even with the spread" };
+    default:
+      return { tone: "pending", live: isLiveGame(game), label: "not started" };
+  }
+}
+
+// gameId -> [{ handle, pick }] across every user, in the users' own order.
+export function picksByGame(users) {
+  const byGame = new Map();
+  for (const [handle, week] of Object.entries(users ?? {})) {
+    for (const pick of week.picks ?? []) {
+      if (!byGame.has(pick.gameId)) byGame.set(pick.gameId, []);
+      byGame.get(pick.gameId).push({ handle, pick });
+    }
+  }
+  return byGame;
+}
+
+// Splits the games our users picked into the three Weekly sections:
+// live (kickoff order), later (kickoff order) and final (most recent first).
+// `onlyHandle` limits it to games that one user picked ("My picks").
+export function weeklySections(users, gamesById, onlyHandle = null) {
+  const byGame = picksByGame(users);
+  const live = [];
+  const later = [];
+  const final = [];
+  for (const [gameId, picks] of byGame) {
+    if (onlyHandle && !picks.some((p) => p.handle === onlyHandle)) continue;
+    const game = gamesById.get(gameId);
+    if (!game) continue;
+    if (FINISHED_STATUSES.has(game.status)) final.push(game);
+    else if (game.status === "scheduled") later.push(game);
+    else live.push(game);
+  }
+  const byKickoff = (a, b) =>
+    new Date(a.startsAt) - new Date(b.startsAt) || a.home.alias.localeCompare(b.home.alias);
+  live.sort(byKickoff);
+  later.sort(byKickoff);
+  final.sort((a, b) => byKickoff(b, a));
+  return { live, later, final };
+}
