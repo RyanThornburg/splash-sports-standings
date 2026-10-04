@@ -8,15 +8,17 @@ colors:
   ink: "#1d1f24"
   ink-2: "#555b66"
   ink-3: "#6e747f"
-  bar: "#1d1f24"
-  bar-2: "#2a2d34"
-  bar-3: "#3a3e48"
+  bar: "#323844"
+  bar-2: "#3e4552"
+  bar-3: "#4a5261"
   on-bar: "#ffffff"
-  on-bar-2: "#aeb3bc"
+  on-bar-2: "#c0c6d0"
   on-solid: "#ffffff"
-  sel-bg: "#1d1f24"
+  sel-bg: "#323844"
   sel-ink: "#ffffff"
   live: "#f5a524"
+  win: "#f2cd62"
+  win-row: "#5a4b22"
   live-ink: "#8a5300"
   live-bg: "#fdf1dc"
   good: "#1d7a45"
@@ -148,7 +150,7 @@ components:
 
 Petz Pool looks like the scoreboard strip in the corner of a college football broadcast, not a spreadsheet and not a rounded-card sports app. Each game is one charcoal bar with condensed white numerals, a clock cell on the right, and the friends who picked each side hanging beneath it as pills. Standings use the same charcoal bar material, so the group's ranking and the games read as one broadcast package.
 
-The page around the bars is quiet: a cool light grey with white, hairline-bordered panels for "your week", the finals list, and the controls. Color is rationed by meaning. Amber means "happening now", green and red mean a pick's status and never appear without a drawn icon, and blue only measures popularity. The dark theme swaps the page to near-black and keeps the bars charcoal, so the bugs stay the brightest-edged objects on screen.
+The page around the bars is quiet: a cool light grey with white, hairline-bordered panels for "your week", the finals list, and the controls. Color is rationed by meaning. Amber means "happening now", green and red mean a pick's status and never appear without a drawn icon, and blue only measures popularity, and gold only crowns the leader. The bars are a cool slate (#323844) rather than near-black, lighter on the grey page while still reading as a scoreboard. The dark theme swaps the page to near-black and keeps the bars charcoal, so the bugs stay the brightest-edged objects on screen.
 
 Density is tuned for a phone held one-handed during a game: 40-44px touch rows, a 10-across tile strip for the week's picks, and a sticky My picks / All games switch. Only the Weekly tab and the shared shell were built in this world. Overall, Team Picks and Trends got the token restyle only (charcoal tables, condensed labels, the shared palette); their structural redesign is deferred, so treat their layouts as provisional, not as the pattern to copy.
 
@@ -182,6 +184,8 @@ A cool neutral grey world with one charcoal material, one amber "now" signal, a 
 - **Selection Ink** (sel-bg, sel-ink): the selected tab and switch segment, plus text selection. Charcoal on white in light; inverts to near-white on near-black in dark, so the selected control is always the strongest surface.
 
 ### Named Rules
+**The Gold Is The Winner Rule.** Gold (`win`, `win-row`) marks only the leader: the week's rank-1 row on the Weekly board and the season's rank-1 row on Overall (ties share it, and nobody gets it at 0 wins). The row takes the `win-row` tint and a gold trophy icon replaces the rank number, with screen-reader text "Leading this week" / "Won the week" / "Season leader". Gold beats the "you" row lift when you are the leader. It is lighter and yellower than live amber and never appears without the trophy.
+
 **The Amber Is Now Rule.** Amber marks time-sensitive state only: a game in progress (live dot, clock quarter label, live tile border) and the stale-data warning. Never decoration, never a status.
 
 **The Never Color Alone Rule.** Green and red appear only on pick status and always beside a drawn SVG icon: check (won), x (lost), up triangle (covering), down triangle (not covering), dash (push or tied), ring (not started). A legend of the same icons accompanies the tile strip and the live section.

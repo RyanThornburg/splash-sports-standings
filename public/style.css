@@ -30,16 +30,21 @@
   --ink: #1d1f24;
   --ink-2: #555b66;
   --ink-3: #6e747f;
-  --bar: #1d1f24;
-  --bar-2: #2a2d34;
-  --bar-3: #3a3e48;
+  /* Cool slate, not black: still a TV scoreboard, lighter on the page. */
+  --bar: #323844;
+  --bar-2: #3e4552;
+  --bar-3: #4a5261;
   --on-bar: #ffffff;
-  --on-bar-2: #aeb3bc;
+  --on-bar-2: #c0c6d0;
   --on-solid: #ffffff;
   /* Selected tab / switch: the strongest surface in either theme. */
-  --sel-bg: #1d1f24;
+  --sel-bg: #323844;
   --sel-ink: #ffffff;
   --live: #f5a524;
+  /* Gold is the winner, only: the week's / season's leader row. Lighter
+     and yellower than live amber, and always with the trophy icon. */
+  --win: #f2cd62;
+  --win-row: #5a4b22;
   --live-ink: #8a5300;
   --live-bg: #fdf1dc;
   --good: #1d7a45;
@@ -65,6 +70,7 @@
     --bar: #24272e;
     --bar-2: #30343c;
     --bar-3: #444954;
+    --win-row: #3f3418;
     --on-solid: #121317;
     --sel-bg: #eef0f3;
     --sel-ink: #121317;
@@ -389,6 +395,26 @@ h1 {
   background: var(--bar-3);
 }
 
+.board .row.win,
+.board-table tr.win {
+  background: var(--win-row);
+}
+
+.board .row.win .rk,
+.board-table tr.win td.rk {
+  color: var(--win);
+}
+
+.trophy {
+  display: inline-flex;
+  vertical-align: -2px;
+}
+
+.trophy .icon {
+  width: 18px;
+  height: 18px;
+}
+
 .board .row.me .rk {
   color: var(--on-bar);
 }
@@ -478,9 +504,6 @@ h1 {
   font-variant-numeric: tabular-nums;
 }
 
-.board-table tr.leader td.rk {
-  color: var(--on-bar);
-}
 
 .board-table tr.me {
   background: var(--bar-3);
@@ -1216,4 +1239,14 @@ h1 {
   .chip {
     transition: background-color 0.15s ease-out, color 0.15s ease-out;
   }
+}
+
+/* Winning beats "you" for the row tint; the You label still marks you. */
+.board .row.win.me,
+.board-table tr.win.me {
+  background: var(--win-row);
+}
+
+.board .row.win.me .rk {
+  color: var(--win);
 }

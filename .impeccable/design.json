@@ -103,7 +103,7 @@
       "bar": {
         "role": "primary",
         "displayName": "Broadcast Charcoal",
-        "canonical": "#1d1f24",
+        "canonical": "#323844",
         "darkValue": "#24272e",
         "tonalRamp": [
           "oklch(15% 0.010 268)",
@@ -119,7 +119,7 @@
       "bar-2": {
         "role": "primary",
         "displayName": "Charcoal Strip",
-        "canonical": "#2a2d34",
+        "canonical": "#3e4552",
         "darkValue": "#30343c",
         "tonalRamp": [
           "oklch(15% 0.013 267)",
@@ -135,7 +135,7 @@
       "bar-3": {
         "role": "primary",
         "displayName": "Charcoal Lift",
-        "canonical": "#3a3e48",
+        "canonical": "#4a5261",
         "darkValue": "#444954",
         "tonalRamp": [
           "oklch(15% 0.018 268)",
@@ -167,7 +167,7 @@
       "on-bar-2": {
         "role": "primary",
         "displayName": "Bar Grey",
-        "canonical": "#aeb3bc",
+        "canonical": "#c0c6d0",
         "darkValue": "#aeb3bc",
         "tonalRamp": [
           "oklch(15% 0.014 262)",
@@ -199,7 +199,7 @@
       "sel-bg": {
         "role": "neutral",
         "displayName": "Selection Ground",
-        "canonical": "#1d1f24",
+        "canonical": "#323844",
         "darkValue": "#eef0f3",
         "tonalRamp": [
           "oklch(15% 0.010 268)",
@@ -371,6 +371,18 @@
           "oklch(85% 0.171 262)",
           "oklch(95% 0.171 262)"
         ]
+      },
+      "win": {
+        "canonical": "#f2cd62",
+        "darkValue": "#f2cd62",
+        "role": "accent",
+        "displayName": "Trophy Gold"
+      },
+      "win-row": {
+        "canonical": "#5a4b22",
+        "darkValue": "#3f3418",
+        "role": "accent",
+        "displayName": "Trophy Row"
       }
     },
     "typographyMeta": {
@@ -442,7 +454,7 @@
       "refersTo": "score-bug",
       "description": "One game as a broadcast scoreboard bar: two team cells and a clock cell; amber quarter when live.",
       "html": "<div class=\"ds-bug\"><div class=\"ds-team\"><span><span class=\"ds-rank\">24</span><span class=\"ds-abbr\">UK</span></span><span class=\"ds-sprd\">+2.5</span><span class=\"ds-score\">15</span></div><div class=\"ds-team ds-trail\"><span><span class=\"ds-abbr\">SCAR</span></span><span class=\"ds-sprd\">-2.5</span><span class=\"ds-score\">14</span></div><div class=\"ds-clock\"><span class=\"ds-q\">2nd</span><span class=\"ds-t\">8:41</span></div></div>",
-      "css": ".ds-bug{display:grid;grid-template-columns:1fr 1fr 70px;height:58px;overflow:hidden;border-radius:10px;background:var(--bar,#1d1f24);color:var(--on-bar,#fff)}.ds-team{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;min-width:0;padding:0 12px;border-right:1px solid var(--bar-2,#2a2d34)}.ds-abbr{font:700 21px/1 var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);letter-spacing:.02em}.ds-rank{margin-right:2px;font:600 12px/1 var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);color:var(--on-bar-2,#aeb3bc);vertical-align:top}.ds-sprd{font:500 13px/1 var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);color:var(--on-bar-2,#aeb3bc)}.ds-score{font:700 32px/1 var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);text-align:right;font-variant-numeric:tabular-nums}.ds-trail .ds-score{color:var(--on-bar-2,#aeb3bc)}.ds-clock{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:var(--bar-2,#2a2d34)}.ds-q{font:700 12px/1 var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);letter-spacing:.08em;text-transform:uppercase;color:var(--live,#f5a524)}.ds-t{font:600 17px/1 var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);font-variant-numeric:tabular-nums}"
+      "css": ".ds-bug{display:grid;grid-template-columns:1fr 1fr 70px;height:58px;overflow:hidden;border-radius:10px;background:var(--bar,#323844);color:var(--on-bar,#fff)}.ds-team{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;min-width:0;padding:0 12px;border-right:1px solid var(--bar-2,#3e4552)}.ds-abbr{font:700 21px/1 var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);letter-spacing:.02em}.ds-rank{margin-right:2px;font:600 12px/1 var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);color:var(--on-bar-2,#c0c6d0);vertical-align:top}.ds-sprd{font:500 13px/1 var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);color:var(--on-bar-2,#c0c6d0)}.ds-score{font:700 32px/1 var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);text-align:right;font-variant-numeric:tabular-nums}.ds-trail .ds-score{color:var(--on-bar-2,#c0c6d0)}.ds-clock{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:var(--bar-2,#3e4552)}.ds-q{font:700 12px/1 var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);letter-spacing:.08em;text-transform:uppercase;color:var(--live,#f5a524)}.ds-t{font:600 17px/1 var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);font-variant-numeric:tabular-nums}"
     },
     {
       "name": "Pick Chip (friend)",
@@ -458,7 +470,7 @@
       "refersTo": "chip-me",
       "description": "Your own pick is a solid pill so it is findable among friends' outlines.",
       "html": "<span class=\"ds-chipme\"><svg viewBox=\"0 0 12 12\" width=\"12\" height=\"12\" aria-hidden=\"true\"><circle cx=\"6\" cy=\"6\" r=\"3.6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/></svg>Rattly</span> <span class=\"ds-chipme ds-good\"><svg viewBox=\"0 0 12 12\" width=\"12\" height=\"12\" aria-hidden=\"true\"><path d=\"M6 2.2 10.4 9.6H1.6Z\" fill=\"currentColor\"/></svg>Rattly</span> <span class=\"ds-chipme ds-bad\"><svg viewBox=\"0 0 12 12\" width=\"12\" height=\"12\" aria-hidden=\"true\"><path d=\"M6 9.8 1.6 2.4h8.8Z\" fill=\"currentColor\"/></svg>Rattly</span>",
-      "css": ".ds-chipme{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 9px 0 7px;border:1.5px solid var(--bar,#1d1f24);border-radius:13px;background:var(--bar,#1d1f24);color:var(--on-bar,#fff);font:700 13px system-ui,sans-serif;white-space:nowrap}.ds-chipme.ds-good{border-color:var(--good,#1d7a45);background:var(--good,#1d7a45);color:var(--on-solid,#fff)}.ds-chipme.ds-bad{border-color:var(--bad,#b8352b);background:var(--bad,#b8352b);color:var(--on-solid,#fff)}"
+      "css": ".ds-chipme{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 9px 0 7px;border:1.5px solid var(--bar,#323844);border-radius:13px;background:var(--bar,#323844);color:var(--on-bar,#fff);font:700 13px system-ui,sans-serif;white-space:nowrap}.ds-chipme.ds-good{border-color:var(--good,#1d7a45);background:var(--good,#1d7a45);color:var(--on-solid,#fff)}.ds-chipme.ds-bad{border-color:var(--bad,#b8352b);background:var(--bad,#b8352b);color:var(--on-solid,#fff)}"
     },
     {
       "name": "Pick Tiles",
@@ -474,7 +486,7 @@
       "refersTo": "standings-board",
       "description": "Charcoal grid of the group's standings; your row lifted to bar-3.",
       "html": "<div class=\"ds-board\"><div class=\"ds-head\"><span>#</span><span>Name</span><span>W-L</span><span>Left</span></div><div class=\"ds-row ds-me\"><span class=\"ds-rk\">1</span><span class=\"ds-name\">Rattly</span><span class=\"ds-rec\">8-6</span><span class=\"ds-left\">6</span></div><div class=\"ds-row\"><span class=\"ds-rk\">2</span><span class=\"ds-name\">EMILYK24</span><span class=\"ds-rec\">7-6</span><span class=\"ds-left\">7</span></div></div>",
-      "css": ".ds-board{background:var(--bar,#1d1f24);color:var(--on-bar,#fff);border-radius:10px;overflow:hidden;max-width:420px}.ds-head,.ds-row{display:grid;grid-template-columns:40px minmax(0,1fr) 64px 52px;align-items:center;padding:0 14px}.ds-head span:nth-child(n+3),.ds-row span:nth-child(n+3){text-align:right}.ds-head{height:30px;background:var(--bar-2,#2a2d34);color:var(--on-bar-2,#aeb3bc);font:600 12px var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);letter-spacing:.08em;text-transform:uppercase}.ds-row{min-height:44px;border-top:1px solid var(--bar-2,#2a2d34)}.ds-me{background:var(--bar-3,#3a3e48)}.ds-rk{font:700 18px var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);color:var(--on-bar-2,#aeb3bc)}.ds-me .ds-rk{color:var(--on-bar,#fff)}.ds-name{font:500 15px system-ui,sans-serif}.ds-rec{font:700 20px var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);font-variant-numeric:tabular-nums}.ds-left{font:600 18px var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);color:var(--on-bar-2,#aeb3bc);font-variant-numeric:tabular-nums}"
+      "css": ".ds-board{background:var(--bar,#323844);color:var(--on-bar,#fff);border-radius:10px;overflow:hidden;max-width:420px}.ds-head,.ds-row{display:grid;grid-template-columns:40px minmax(0,1fr) 64px 52px;align-items:center;padding:0 14px}.ds-head span:nth-child(n+3),.ds-row span:nth-child(n+3){text-align:right}.ds-head{height:30px;background:var(--bar-2,#3e4552);color:var(--on-bar-2,#c0c6d0);font:600 12px var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);letter-spacing:.08em;text-transform:uppercase}.ds-row{min-height:44px;border-top:1px solid var(--bar-2,#3e4552)}.ds-me{background:var(--bar-3,#4a5261)}.ds-rk{font:700 18px var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);color:var(--on-bar-2,#c0c6d0)}.ds-me .ds-rk{color:var(--on-bar,#fff)}.ds-name{font:500 15px system-ui,sans-serif}.ds-rec{font:700 20px var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);font-variant-numeric:tabular-nums}.ds-left{font:600 18px var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);color:var(--on-bar-2,#c0c6d0);font-variant-numeric:tabular-nums}"
     },
     {
       "name": "Tabs",
@@ -482,7 +494,7 @@
       "refersTo": "tab",
       "description": "White tray of equal condensed uppercase tabs; selected uses sel-bg/sel-ink.",
       "html": "<nav class=\"ds-tabs\" role=\"tablist\"><button class=\"ds-tab\" role=\"tab\">Overall</button><button class=\"ds-tab ds-active\" role=\"tab\" aria-selected=\"true\">Weekly</button><button class=\"ds-tab\" role=\"tab\">Team Picks</button><button class=\"ds-tab\" role=\"tab\">Trends</button></nav>",
-      "css": ".ds-tabs{display:flex;gap:4px;padding:4px;background:var(--card,#fff);border:1px solid var(--line,#e1e3e8);border-radius:10px}.ds-tab{flex:1 1 0;min-height:40px;padding:0 8px;border:0;border-radius:7px;background:none;cursor:pointer;font:700 15px var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2,#555b66);transition:background-color .15s ease-out,color .15s ease-out}.ds-tab:hover{color:var(--ink,#1d1f24)}.ds-tab:focus-visible{outline:2px solid var(--ink,#1d1f24);outline-offset:2px}.ds-tab.ds-active{background:var(--sel-bg,#1d1f24);color:var(--sel-ink,#fff)}"
+      "css": ".ds-tabs{display:flex;gap:4px;padding:4px;background:var(--card,#fff);border:1px solid var(--line,#e1e3e8);border-radius:10px}.ds-tab{flex:1 1 0;min-height:40px;padding:0 8px;border:0;border-radius:7px;background:none;cursor:pointer;font:700 15px var(--cond, \"Barlow Semi Condensed\", \"Arial Narrow\", system-ui, sans-serif);letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2,#555b66);transition:background-color .15s ease-out,color .15s ease-out}.ds-tab:hover{color:var(--ink,#1d1f24)}.ds-tab:focus-visible{outline:2px solid var(--ink,#1d1f24);outline-offset:2px}.ds-tab.ds-active{background:var(--sel-bg,#323844);color:var(--sel-ink,#fff)}"
     },
     {
       "name": "Select",

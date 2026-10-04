@@ -56,7 +56,16 @@ const ICON = {
   down: svg('<path d="M6 9.8 1.6 2.4h8.8Z" fill="currentColor"/>'),
   dash: svg('<path d="M2.5 6h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'),
   ring: svg('<circle cx="6" cy="6" r="3.6" fill="none" stroke="currentColor" stroke-width="1.6"/>'),
+  trophy: svg(
+    '<path d="M3.2 1.4h5.6v3.1a2.8 2.8 0 0 1-5.6 0Z" fill="currentColor"/>' +
+      '<path d="M3.2 2.4H1.6v.9a1.9 1.9 0 0 0 1.9 1.9M8.8 2.4h1.6v.9a1.9 1.9 0 0 1-1.9 1.9M6 7.4v2M3.9 10.6h4.2" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>',
+  ),
 };
+
+// Rank cell for a leader: the trophy stands in for "1" (ties share it).
+function trophyRank(label) {
+  return `<span class="trophy" title="${esc(label)}">${ICON.trophy}<span class="sr-only">${esc(label)}</span></span>`;
+}
 
 function statusIcon(status) {
   if (status.tone === "good") return status.live ? ICON.up : ICON.check;
@@ -135,9 +144,10 @@ function renderStandings(data) {
   const me = readStored(ME_STORAGE_KEY);
   tbody.innerHTML = withGroupRank(entries)
     .map(({ entry, groupRankLabel, groupRank }) => {
-      const classes = [groupRank === 1 ? "leader" : "", entry.handle === me ? "me" : ""].join(" ").trim();
+      const leader = groupRank === 1 && entry.wins > 0;
+      const classes = [leader ? "win" : "", entry.handle === me ? "me" : ""].join(" ").trim();
       const cells = [
-        `<td class="rk">${esc(groupRankLabel)}</td>`,
+        `<td class="rk">${leader ? trophyRank("Season leader") : esc(groupRankLabel)}</td>`,
         `<td>${esc(entry.displayName ?? entry.handle)}</td>`,
         `<td class="rec">${esc(recordText(entry))}</td>`,
         `<td class="num col-num">${esc(winPct(entry))}</td>`,
@@ -265,13 +275,16 @@ function renderWhoPicker(slate) {
 
 function renderBoard(slate, me) {
   const rows = weekStandings(slate.users);
+  const settled = slate.status === "settled" || slate.final === true;
   $("week-board").innerHTML =
     `<div class="head"><span>#</span><span>Name</span><span>W-L</span><span>Left</span></div>` +
     rows
       .map((r) => {
         const isMe = r.handle === me;
+        const leader = r.rank === 1 && r.wins > 0;
+        const rank = leader ? trophyRank(settled ? "Won the week" : "Leading this week") : esc(r.rankLabel);
         const you = isMe ? `<span class="you">You · <button type="button" id="change-me">Change</button></span>` : "";
-        return `<div class="row${isMe ? " me" : ""}"><span class="rk">${esc(r.rankLabel)}</span>
+        return `<div class="row${isMe ? " me" : ""}${leader ? " win" : ""}"><span class="rk">${rank}</span>
           <span class="name">${esc(r.handle)}${you}</span>
           <span class="rec">${esc(recordText(r))}</span><span class="left">${esc(r.pending)}</span></div>`;
       })
