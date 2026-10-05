@@ -17,8 +17,6 @@ colors:
   sel-bg: "#323844"
   sel-ink: "#ffffff"
   live: "#f5a524"
-  win: "#f2cd62"
-  win-row: "#5a4b22"
   win-bg: "#fbf3d9"
   win-ink: "#8f6a00"
   live-ink: "#8a5300"
@@ -168,7 +166,7 @@ Density is tuned for a phone held one-handed during a game: 40-44px touch rows, 
 A cool neutral grey world with one charcoal material, one amber "now" signal, a green/red pick-status pair, and a blue reserved for popularity. Every token is redefined in a `prefers-color-scheme: dark` block (overridable with `data-theme="light"`); the hex values below are the light theme.
 
 ### Primary
-- **Broadcast Charcoal** (bar): the scoreboard material. Score bugs, the standings board, and the Overall/Team Picks tables. `bar-2` is the header strip, clock cell and row rules; `bar-3` lifts your own standings row.
+- **Broadcast Slate** (bar): the scoreboard material, used only by the score bugs (and the selected tab/switch via `sel-bg`). `bar-2` is the clock cell and team divider. Standings tables are white panels, not slate.
 - **Bar White / Bar Grey** (on-bar, on-bar-2): primary numerals and names on charcoal; on-bar-2 for ranks, spreads, column heads, "left" counts and the trailing team's score.
 
 ### Secondary
@@ -186,9 +184,9 @@ A cool neutral grey world with one charcoal material, one amber "now" signal, a 
 - **Selection Ink** (sel-bg, sel-ink): the selected tab and switch segment, plus text selection. Charcoal on white in light; inverts to near-white on near-black in dark, so the selected control is always the strongest surface.
 
 ### Named Rules
-**The Gold Is The Winner Rule.** Gold (`win`, `win-row`) marks only the leader: the week's rank-1 row on the Weekly board and the season's rank-1 row on Overall (ties share it, and nobody gets it at 0 wins). The row takes the `win-row` tint and a gold trophy icon replaces the rank number, with screen-reader text "Leading this week" / "Won the week" / "Season leader". Gold beats the "you" row lift when you are the leader. It is lighter and yellower than live amber and never appears without the trophy.
+**The Gold Is The Winner Rule.** Gold (`win-bg` row tint, `win-ink` trophy) marks only the leader: the week's rank-1 row on Weekly's "This week" table and the season's rank-1 row on Overall (ties share it, nobody gets it at 0 wins). A trophy icon replaces the rank number, with screen-reader text "Leading this week" / "Won the week" / "Season leader". Gold beats the "you" row tint when you lead. It is distinct from live amber and never appears without the trophy.
 
-**Quiet Tables Rule.** Season totals (Overall, Team Picks) are not scoreboards: they sit in a white ruled panel (`card`, `line` hairlines, 40px rows, max 720px wide) with semibold 17px condensed records and regular-weight grey numbers. The slate bar is reserved for Weekly's live board and score bugs. On these light tables the leader uses `win-bg` with a `win-ink` trophy, and your row a faint `page` tint.
+**Quiet Tables Rule.** Standings are not scoreboards: Weekly's "This week", Overall and Team Picks all sit in a white ruled panel (`card`, `line` hairlines, 40px rows; Overall/Team Picks capped at 720px) with semibold 17px condensed records and regular-weight grey numbers. The slate bar is reserved for the score bugs. The leader uses `win-bg` with a `win-ink` trophy, and your row a faint `page` tint.
 
 **The Amber Is Now Rule.** Amber marks time-sensitive state only: a game in progress (live dot, clock quarter label, live tile border) and the stale-data warning. Never decoration, never a status.
 
@@ -221,9 +219,9 @@ A cool neutral grey world with one charcoal material, one amber "now" signal, a 
 
 A single centered column, max 1080px, 16px side gutters, 18px top and 48px bottom padding. Section titles sit 24px above their content with 10px below. Controls (tab bar, week nav, switch) are white trays with 4px inner padding holding 40px-high targets.
 
-The standings board is a four-column grid (40px rank, flexible name, 64px W-L, 52px left), 30px header strip, 44px rows. A score bug is a three-column grid (away, home, 70px clock), 58px tall, with a matching grid of pick pills below it so each side's friends hang under their team. Finals are compact two-team rows on one white panel with a 44px "Final" column. The your-week strip is a 10-column tile grid with 4px gaps.
+Weekly's standings table is a four-column grid (40px rank, flexible name, 64px W-L, 52px left), 32px header, 40px hairline-ruled rows on a white panel. A score bug is a three-column grid (away, home, 70px clock), 58px tall, with a matching grid of pick pills below it so each side's friends hang under their team. Finals are compact two-team rows on one white panel with a 44px "Final" column. The your-week strip is a 10-column tile grid with 4px gaps.
 
-At **900px and up**: live and later bugs go two per row (18px row gap, 20px column gap), finals split into two columns with a center rule, and the standings board and your-week panel sit side by side at equal height, with the tiles stretching to fill the panel. At **420px and down** tab labels tighten (14px, 4px padding). The Overall table keeps its own tighter cell padding so its seven columns fit a 375px viewport without horizontal scroll.
+At **900px and up**: live and later bugs go two per row (18px row gap, 20px column gap), finals split into two columns with a center rule, and the standings board and your-week panel sit side by side at equal height, with the tiles stretching to fill the panel. At **420px and down** tab labels tighten (14px, 4px padding). The Overall table hides its Left and TB columns when empty so it fits a 390px viewport without horizontal scroll.
 
 The My picks / All games switch is sticky at the top of the viewport; game anchors carry a 72px scroll margin so tile links land below it.
 

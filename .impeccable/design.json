@@ -372,18 +372,6 @@
           "oklch(95% 0.171 262)"
         ]
       },
-      "win": {
-        "canonical": "#f2cd62",
-        "darkValue": "#f2cd62",
-        "role": "accent",
-        "displayName": "Trophy Gold"
-      },
-      "win-row": {
-        "canonical": "#5a4b22",
-        "darkValue": "#3f3418",
-        "role": "accent",
-        "displayName": "Trophy Row"
-      },
       "win-bg": {
         "canonical": "#fbf3d9",
         "darkValue": "#2e2814",

@@ -41,11 +41,8 @@
   --sel-bg: #323844;
   --sel-ink: #ffffff;
   --live: #f5a524;
-  /* Gold is the winner, only: the week's / season's leader row. Lighter
-     and yellower than live amber, and always with the trophy icon. */
-  --win: #f2cd62;
-  --win-row: #5a4b22;
-  /* Gold on light surfaces (Overall table). */
+  /* Gold is the winner, only: the week's / season's leader row, always
+     with the trophy icon. Distinct from live amber. */
   --win-bg: #fbf3d9;
   --win-ink: #8f6a00;
   --live-ink: #8a5300;
@@ -73,7 +70,6 @@
     --bar: #24272e;
     --bar-2: #30343c;
     --bar-3: #444954;
-    --win-row: #3f3418;
     --win-bg: #2e2814;
     --win-ink: #f2cd62;
     --on-solid: #121317;
@@ -336,13 +332,14 @@ h1 {
   font-weight: 500;
 }
 
-/* ---- Standings board (Weekly and Overall share the look) ---- */
+/* ---- Standings (Weekly's "This week"; same quiet table as Overall) ---- */
 
 .board {
-  background: var(--bar);
-  color: var(--on-bar);
-  border-radius: 10px;
   overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--ink);
 }
 
 .board .head,
@@ -354,17 +351,16 @@ h1 {
 }
 
 .board .head {
-  height: 30px;
-  background: var(--bar-2);
-  color: var(--on-bar-2);
+  height: 32px;
+  color: var(--ink-3);
   font: 600 12px var(--cond);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .board .row {
-  min-height: 44px;
-  border-top: 1px solid var(--bar-2);
+  min-height: 40px;
+  border-top: 1px solid var(--line);
 }
 
 .board .head span:nth-child(n + 3),
@@ -373,8 +369,8 @@ h1 {
 }
 
 .board .rk {
-  font: 700 18px var(--cond);
-  color: var(--on-bar-2);
+  font: 600 16px var(--cond);
+  color: var(--ink-3);
 }
 
 .board .name {
@@ -386,26 +382,27 @@ h1 {
 }
 
 .board .rec {
-  font: 700 20px var(--cond);
+  font: 600 17px var(--cond);
   font-variant-numeric: tabular-nums;
 }
 
 .board .left {
-  font: 600 18px var(--cond);
-  color: var(--on-bar-2);
+  font: 500 16px var(--cond);
+  color: var(--ink-2);
   font-variant-numeric: tabular-nums;
 }
 
 .board .row.me {
-  background: var(--bar-3);
+  background: var(--page);
 }
 
-.board .row.win {
-  background: var(--win-row);
+.board .row.win,
+.board .row.win.me {
+  background: var(--win-bg);
 }
 
 .board .row.win .rk {
-  color: var(--win);
+  color: var(--win-ink);
 }
 
 .trophy {
@@ -418,15 +415,11 @@ h1 {
   height: 18px;
 }
 
-.board .row.me .rk {
-  color: var(--on-bar);
-}
-
 .you {
   margin-left: 6px;
   font-size: 12px;
   font-weight: 600;
-  color: var(--on-bar-2);
+  color: var(--ink-3);
 }
 
 .you button {
@@ -434,7 +427,7 @@ h1 {
   border: 0;
   background: none;
   cursor: pointer;
-  color: var(--on-bar);
+  color: var(--ink);
   font-size: 12px;
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -1252,13 +1245,4 @@ h1 {
   .chip {
     transition: background-color 0.15s ease-out, color 0.15s ease-out;
   }
-}
-
-/* Winning beats "you" for the row tint; the You label still marks you. */
-.board .row.win.me {
-  background: var(--win-row);
-}
-
-.board .row.win.me .rk {
-  color: var(--win);
 }
