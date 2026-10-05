@@ -33,7 +33,7 @@
         <button class="tab-button" role="tab" aria-selected="false" aria-controls="tab-trends" data-tab="trends">Trends</button>
       </nav>
 
-      <section id="tab-overall" class="tab-panel" role="tabpanel">
+      <section id="tab-overall" class="tab-panel" role="tabpanel" hidden>
         <div class="board-scroll">
           <table id="standings" class="board-table">
             <thead>
@@ -50,6 +50,7 @@
             <tbody id="standings-body"></tbody>
           </table>
         </div>
+        <p id="standings-note" class="table-note"></p>
         <p id="standings-empty" class="empty" hidden>No standings yet.</p>
         <a id="splash-link" class="splash-link" href="#" target="_blank" rel="noopener" hidden>
           View full contest on Splash Sports
@@ -64,7 +65,10 @@
           <button type="button" id="week-prev" aria-label="Previous week">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
           </button>
-          <strong id="week-label"></strong>
+          <div class="week-title">
+            <strong id="week-label"></strong>
+            <span id="week-state" class="week-state"></span>
+          </div>
           <button type="button" id="week-next" aria-label="Next week">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
           </button>
@@ -110,8 +114,9 @@
             <div id="games-later"></div>
           </div>
           <div id="sec-final" class="game-section" hidden>
-            <h2 class="section-title">Final <span class="count" id="count-final"></span></h2>
+            <h2 class="section-title">Final <span class="count" id="count-final"></span><span class="count" id="final-record"></span></h2>
             <div class="finals" id="games-final"></div>
+            <button type="button" id="final-toggle" class="more-button" aria-controls="games-final" hidden></button>
           </div>
         </div>
       </section>
@@ -133,6 +138,7 @@
 
         <h2 class="section-title">Our group</h2>
         <div id="trends-group-content"></div>
+        <button type="button" id="trends-more" class="more-button" aria-controls="trends-group-content" hidden></button>
         <p id="trends-group-empty" class="empty" hidden>No consensus or split picks this week.</p>
 
         <h2 class="section-title">Pool: most picked this week</h2>

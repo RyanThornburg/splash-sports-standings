@@ -12,11 +12,14 @@ import {
   pickCellClass,
   picksByGame,
   pickStatus,
+  rankGroupTrends,
   recordText,
   relativeTime,
   sortGameIds,
+  weekInProgress,
   weeklySections,
   weekStandings,
+  weekState,
   winPct,
   withGroupRank,
 } from "../public/lib.js";
@@ -469,5 +472,79 @@ describe("picksByGame / weeklySections", () => {
   it("limits to one user's games for My picks", () => {
     const s = weeklySections(users, gamesById, "A");
     expect([...s.live, ...s.later, ...s.final].map((g) => g.gameId)).toEqual(["live", "final-early"]);
+  });
+});
+
+describe("rankGroupTrends", () => {
+  // Minimal computeGroupTrends-shaped rows: one entry per side.
+  const row = (gameId, ...sides) => {
+    const teams = sides
+      .map(([alias, handles]) => ({ team: { alias }, handles, count: handles.length, statusClass: "pick-pending" }))
+      .sort((a, b) => b.count - a.count);
+    const maxCount = teams[0].count;
+    return { gameId, teams, isSplit: teams.length > 1, isConsensus: maxCount >= 3, maxCount };
+  };
+  const rows = [
+    row("oneVsOne", ["X", ["A"]], ["Y", ["B"]]),
+    row("lock", ["X", ["A", "B", "C", "D", "E"]]),
+    row("twoVsTwo", ["X", ["A", "B"]], ["Y", ["C", "D"]]),
+    row("meAlone", ["X", ["B", "C", "D"]], ["Y", ["ME"]]),
+    row("meCloser", ["X", ["B", "C"]], ["Y", ["ME"]]),
+    row("threeAgree", ["X", ["A", "B", "C"]]),
+  ];
+
+  it("puts games where you're outnumbered first (biggest gap first), then 4+ locks, then fullest splits", () => {
+    const ranked = rankGroupTrends(rows, "ME");
+    expect(ranked.map((r) => r.gameId)).toEqual(["meAlone", "meCloser", "lock", "twoVsTwo", "threeAgree", "oneVsOne"]);
+    expect(ranked.map((r) => r.reason)).toEqual(["outnumbered", "outnumbered", "lock", "split", "consensus", "split"]);
+  });
+
+  it("has no outnumbered tier for someone just looking", () => {
+    const ranked = rankGroupTrends(rows, null);
+    expect(ranked[0].gameId).toBe("lock");
+    expect(ranked.some((r) => r.reason === "outnumbered")).toBe(false);
+  });
+
+  it("doesn't call you outnumbered when your side is bigger or level", () => {
+    const ranked = rankGroupTrends([row("g", ["X", ["ME", "A"]], ["Y", ["B"]])], "ME");
+    expect(ranked[0].reason).toBe("split");
+  });
+});
+
+describe("weekState / weekInProgress", () => {
+  const at = (gameId, status, startsAt) => game({ gameId, status, startsAt });
+  const usersFor = (...ids) => ({ A: { picks: ids.map((gameId) => pick({ gameId })) } });
+  const byId = (...gs) => new Map(gs.map((g) => [g.gameId, g]));
+
+  it("is live while any picked game is being played", () => {
+    const gs = byId(at("a", "in_progress", "2026-10-03T16:00:00Z"), at("b", "scheduled", "2026-10-03T20:00:00Z"));
+    expect(weekState(usersFor("a", "b"), gs)).toEqual({ kind: "live", live: 1, later: 1 });
+    expect(weekInProgress(usersFor("a", "b"), gs)).toBe(true);
+  });
+
+  it("is between games when some are done and more are to come, with the next kickoff", () => {
+    const gs = byId(at("a", "finalized", "2026-10-03T16:00:00Z"), at("b", "scheduled", "2026-10-03T20:00:00Z"));
+    expect(weekState(usersFor("a", "b"), gs)).toEqual({ kind: "between", later: 1, next: "2026-10-03T20:00:00Z" });
+    expect(weekInProgress(usersFor("a", "b"), gs)).toBe(true);
+  });
+
+  it("is upcoming before anything kicks off, and not in progress", () => {
+    const gs = byId(at("a", "scheduled", "2026-10-03T16:00:00Z"));
+    expect(weekState(usersFor("a"), gs)).toEqual({ kind: "upcoming", next: "2026-10-03T16:00:00Z" });
+    expect(weekInProgress(usersFor("a"), gs)).toBe(false);
+  });
+
+  it("is final with the first and last kickoff once every picked game is done", () => {
+    const gs = byId(at("a", "finalized", "2026-09-26T16:00:00Z"), at("b", "finished", "2026-09-29T00:00:00Z"));
+    expect(weekState(usersFor("a", "b"), gs)).toEqual({
+      kind: "final",
+      first: "2026-09-26T16:00:00Z",
+      last: "2026-09-29T00:00:00Z",
+    });
+    expect(weekInProgress(usersFor("a", "b"), gs)).toBe(false);
+  });
+
+  it("is null with no picks", () => {
+    expect(weekState({}, new Map())).toBeNull();
   });
 });

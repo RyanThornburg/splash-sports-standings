@@ -139,6 +139,45 @@ export function computeGroupTrends(users, gamesById, { consensusThreshold = 3 } 
   return rows.sort((a, b) => b.maxCount - a.maxCount);
 }
 
+// Orders computeGroupTrends rows so the few worth reading come first, and
+// tags each with why it's there:
+//   "outnumbered" - `me` is on the smaller side of a split (most first)
+//   "lock"        - 4+ of us on one side (biggest first)
+//   "split"/"consensus" - everything else, most of us involved first, then
+//                         the more even split
+// A 1-vs-1 split still counts, it just sorts to the bottom.
+export function rankGroupTrends(rows, me = null, { lockThreshold = 4 } = {}) {
+  const ranked = rows.map((row) => {
+    const mine = me ? row.teams.find((t) => t.handles.includes(me)) : null;
+    const others = mine ? row.teams.filter((t) => t !== mine) : [];
+    const biggestOther = Math.max(0, ...others.map((t) => t.count));
+    let reason;
+    let tier;
+    if (mine && biggestOther > mine.count) {
+      reason = "outnumbered";
+      tier = 0;
+    } else if (row.maxCount >= lockThreshold) {
+      reason = "lock";
+      tier = 1;
+    } else {
+      reason = row.isSplit ? "split" : "consensus";
+      tier = 2;
+    }
+    const involved = row.teams.reduce((n, t) => n + t.count, 0);
+    // Smaller side of the game: how many of us are on the other end of the argument.
+    const minority = row.teams.length > 1 ? Math.min(...row.teams.map((t) => t.count)) : 0;
+    return { ...row, reason, tier, involved, minority, gap: biggestOther - (mine?.count ?? 0) };
+  });
+  return ranked.sort(
+    (a, b) =>
+      a.tier - b.tier ||
+      (a.tier === 0 ? b.gap - a.gap : 0) ||
+      b.involved - a.involved ||
+      b.minority - a.minority ||
+      b.maxCount - a.maxCount,
+  );
+}
+
 // Top teams by pool-wide pick count for one slate
 export function computePoolTopPicks(poolPickCounts, poolEntryCount, gamesById, topX = 10) {
   return [...poolPickCounts]
@@ -306,4 +345,30 @@ export function weeklySections(users, gamesById, onlyHandle = null) {
   later.sort(byKickoff);
   final.sort((a, b) => byKickoff(b, a));
   return { live, later, final };
+}
+
+// Where a week stands, from the games our users picked, for the line under
+// the week label. Plain data; app.js does the date/time formatting.
+//   { kind: "live", live, later }        games on right now
+//   { kind: "between", later, next }     started, nothing live, more to come
+//   { kind: "upcoming", next }           nothing kicked off yet
+//   { kind: "final", first, last }       every picked game is done
+//   null                                  no picked games
+export function weekState(users, gamesById) {
+  const { live, later, final } = weeklySections(users, gamesById);
+  if (live.length) return { kind: "live", live: live.length, later: later.length };
+  if (later.length) {
+    const next = later[0].startsAt;
+    return final.length ? { kind: "between", later: later.length, next } : { kind: "upcoming", next };
+  }
+  if (!final.length) return null;
+  // final is newest-first
+  return { kind: "final", first: final[final.length - 1].startsAt, last: final[0].startsAt };
+}
+
+// True while a week is being played: something live, or some games done
+// with more still to come. Decides whether the site opens on Weekly.
+export function weekInProgress(users, gamesById) {
+  const state = weekState(users, gamesById);
+  return state?.kind === "live" || state?.kind === "between";
 }

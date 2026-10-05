@@ -183,6 +183,9 @@ A cool neutral grey world with one charcoal material, one amber "now" signal, a 
 - **Ink / Ink 2 / Ink 3** (ink, ink-2, ink-3): text in three steps: primary, secondary (section titles, unselected tabs, notes), tertiary (counts, keys, losing team in finals).
 - **Selection Ink** (sel-bg, sel-ink): the selected tab and switch segment, plus text selection. Charcoal on white in light; inverts to near-white on near-black in dark, so the selected control is always the strongest surface.
 
+### Dark values
+page #121317, card #1b1d22, line #2c2f36, ink #eef0f3, ink-2 #a9aeb8, ink-3 #8f949e, bar #24272e, bar-2 #30343c, bar-3 #444954, on-solid #121317, sel-bg #eef0f3, sel-ink #121317, win-bg #2e2814, win-ink #f2cd62, live-ink #f5b84d, live-bg #33270f, good #5cc98a, good-bg #16301f, bad #f08a80, bad-bg #3a1c1a, push-bg #2a2d33, accent #7ea3f0. Tokens not listed keep their light value.
+
 ### Named Rules
 **The Gold Is The Winner Rule.** Gold (`win-bg` row tint, `win-ink` trophy) marks only the leader: the week's rank-1 row on Weekly's "This week" table and the season's rank-1 row on Overall (ties share it, nobody gets it at 0 wins). A trophy icon replaces the rank number, with screen-reader text "Leading this week" / "Won the week" / "Season leader". Gold beats the "you" row tint when you lead. It is distinct from live amber and never appears without the trophy.
 
@@ -219,7 +222,7 @@ A cool neutral grey world with one charcoal material, one amber "now" signal, a 
 
 A single centered column, max 1080px, 16px side gutters, 18px top and 48px bottom padding. Section titles sit 24px above their content with 10px below. Controls (tab bar, week nav, switch) are white trays with 4px inner padding holding 40px-high targets.
 
-Weekly's standings table is a four-column grid (40px rank, flexible name, 64px W-L, 52px left), 32px header, 40px hairline-ruled rows on a white panel. A score bug is a three-column grid (away, home, 70px clock), 58px tall, with a matching grid of pick pills below it so each side's friends hang under their team. Finals are compact two-team rows on one white panel with a 44px "Final" column. The your-week strip is a 10-column tile grid with 4px gaps.
+Weekly's standings table is a four-column grid (40px rank, flexible name, 64px W-L, 52px left), 32px header, 40px hairline-ruled rows on a white panel. A score bug is a three-column grid (away, home, 70px clock), 58px tall, with a matching grid of pick pills below it so each side's friends hang under their team. Finals are compact two-team rows on one white panel with a 44px "Final" column; the home side's chips span into that column so two chips sit side by side more often. While any game is live or later, the finals collapse behind a "Show N final games" button (with "· You W-L" beside the section count in My picks). The your-week strip is a 10-column tile grid with 4px gaps.
 
 At **900px and up**: live and later bugs go two per row (18px row gap, 20px column gap), finals split into two columns with a center rule, and the standings board and your-week panel sit side by side at equal height, with the tiles stretching to fill the panel. At **420px and down** tab labels tighten (14px, 4px padding). The Overall table hides its Left and TB columns when empty so it fits a 390px viewport without horizontal scroll.
 
@@ -249,12 +252,15 @@ The broadcast bar for one game. Charcoal, 58px, 10px corners, clipped. Each team
 44px cells, 7px corners, icon over a 12px condensed abbreviation, linking to the game. Won/lost/push use the tinted fills (good-bg, bad-bg, push-bg); a live game gets a white tile with an amber 1.5px border and a colored icon; not-started tiles are outlined in hairline with ink-2.
 
 ### Standings Board
-Charcoal grid with a bar-2 header strip of 12px uppercase labels, 44px rows ruled in bar-2. Your row is lifted to bar-3 with "You · Change" beside your handle. The Overall tab renders the same material as a real table (restyle only).
+Weekly's "This week" grid and the Overall table follow the Quiet Tables Rule. Your row carries "You · Change" beside your handle; "Change" has a 40px tap area via negative margin so the row stays 40px. Overall ends with a one-line key (`table-note`) for its abbreviated heads (Left, Pool, TB), since tooltips don't work on a phone.
+
+### Show/hide button
+`more-button`: a full-width white tray button, 40px, 10px corners, 14px condensed uppercase ink-2 (ink and ink border on hover), under the list it controls with `aria-expanded`. Used for collapsed finals and Trends "Show all N games".
 
 ### Navigation
 - **Tabs:** a white tray of four equal 40px buttons, 15px condensed uppercase, ink-2 at rest, ink on hover, selected fills with sel-bg/sel-ink.
 - **My picks / All games switch:** same tray and selected treatment, sticky, with a dimmed count in parentheses.
-- **Week nav:** white tray, 44x40 chevron buttons (page-tint hover, 0.3 opacity when disabled), centered 18px condensed week label.
+- **Week nav:** white tray, 44x40 chevron buttons (page-tint hover, 0.3 opacity when disabled), centered 18px condensed week label with a 13px ink-2 state line under it ("Final · Sep 27–29", "3 live · 9 later", "4 to go · next Sat 7:30 PM", "Starts Sat 12:00 PM").
 
 ### Panels
 White, 1px hairline, 10px corners, 10-14px padding. Used for your week (title, W-L, live up/down, left, tile strip, icon key), the finals list and the friend picker.

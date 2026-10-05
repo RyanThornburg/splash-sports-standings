@@ -8,9 +8,12 @@ import {
   gameHeaderLines,
   pickStatus,
   picksByGame,
+  rankGroupTrends,
   recordText,
   relativeTime,
+  weekInProgress,
   weekStandings,
+  weekState,
   weeklySections,
   winPct,
   withGroupRank,
@@ -20,9 +23,12 @@ const POLL_INTERVAL_MS = 60_000;
 const SELECTED_USER_STORAGE_KEY = "splash_selected_user";
 const ME_STORAGE_KEY = "petz_me";
 const MODE_STORAGE_KEY = "petz_weekly_mode";
+const TAB_STORAGE_KEY = "petz_tab";
 // Stored as "me" when the visitor says they're not one of the six.
 const NOT_IN_GROUP = "__none__";
 const TRENDS_TOP_X = 10;
+// "Our group" shows this many games before "Show all".
+const GROUP_TRENDS_SHOWN = 5;
 
 const $ = (id) => document.getElementById(id);
 
@@ -140,6 +146,14 @@ function renderStandings(data) {
   // Same for picks left: only meaningful while a week has undecided picks.
   const hasPending = entries.some((entry) => entry.pending != null);
   $("left-header").hidden = !hasPending;
+
+  // The column heads are abbreviations and tooltips don't work on a phone.
+  const note = [];
+  if (hasPending) note.push("<b>Left</b> picks not decided yet");
+  note.push("<b>Pool</b> rank in the whole Splash contest");
+  if (hasTiebreak) note.push("<b>TB</b> tiebreaker: how far off your score guess was, lower is better");
+  $("standings-note").innerHTML = note.join(" · ");
+  $("standings-note").hidden = entries.length === 0;
 
   const me = readStored(ME_STORAGE_KEY);
   tbody.innerHTML = withGroupRank(entries)
@@ -327,6 +341,10 @@ function renderYourWeek(slate, gamesById, me) {
     `<span>${ICON.up}covering</span><span>${ICON.down}not covering</span><span>${ICON.ring}not started</span>`;
 }
 
+// Finals collapse while anything is live or still to come; this remembers
+// a tap to open them across the 60s re-renders.
+let finalsOpen = false;
+
 function renderGames(slate, gamesById, me) {
   const mode = me ? getMode() : "all";
   const segwrap = $("segwrap");
@@ -343,7 +361,10 @@ function renderGames(slate, gamesById, me) {
     for (const b of segwrap.querySelectorAll("button")) b.setAttribute("aria-pressed", String(b.dataset.mode === mode));
   }
 
-  const myPickFor = (gameId) => (me ? byGame.get(gameId)?.find((p) => p.handle === me)?.pick : null);
+  // In My picks every game is yours and your solid chip already says which
+  // side, so the "Your pick" tag only earns its line in All games.
+  const myPickFor = (gameId) =>
+    me && mode === "all" ? byGame.get(gameId)?.find((p) => p.handle === me)?.pick : null;
   const fill = (key, games, render) => {
     $(`sec-${key}`).hidden = games.length === 0;
     $(`count-${key}`).textContent = games.length;
@@ -357,6 +378,47 @@ function renderGames(slate, gamesById, me) {
   fill("live", shown.live, scoreBug);
   fill("later", shown.later, scoreBug);
   fill("final", shown.final, finalRow);
+
+  let record = "";
+  if (me && mode === "mine" && shown.final.length) {
+    const tones = shown.final.map((g) => pickStatus(byGame.get(g.gameId).find((p) => p.handle === me).pick, g).tone);
+    const count = (t) => tones.filter((x) => x === t).length;
+    record = `· You ${recordText({ wins: count("good"), losses: count("bad"), ties: count("push") })}`;
+  }
+  $("final-record").textContent = record;
+
+  const collapsible = shown.live.length + shown.later.length > 0 && shown.final.length > 0;
+  const open = !collapsible || finalsOpen;
+  $("games-final").hidden = !open;
+  const toggle = $("final-toggle");
+  toggle.hidden = !collapsible;
+  toggle.setAttribute("aria-expanded", String(open));
+  toggle.textContent = open ? "Hide final games" : `Show ${shown.final.length} final ${shown.final.length === 1 ? "game" : "games"}`;
+}
+
+$("final-toggle").addEventListener("click", () => {
+  finalsOpen = !finalsOpen;
+  renderWeekly();
+});
+
+// "Final · Sep 27–29", "3 live · 9 later", "Starts Sat 12:00 PM"...
+function weekStateText(state) {
+  if (!state) return "";
+  const when = (iso) => {
+    const k = kickoff({ startsAt: iso });
+    return `${k.day} ${k.time}`;
+  };
+  if (state.kind === "live") return `${state.live} live${state.later ? ` · ${state.later} later` : ""}`;
+  if (state.kind === "between") return `${state.later} to go · next ${when(state.next)}`;
+  if (state.kind === "upcoming") return `Starts ${when(state.next)}`;
+  const a = new Date(state.first);
+  const b = new Date(state.last);
+  const md = (d) => d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  let range = md(a);
+  if (md(a) !== md(b)) {
+    range = a.getMonth() === b.getMonth() ? `${md(a)}–${b.getDate()}` : `${md(a)} – ${md(b)}`;
+  }
+  return `Final · ${range}`;
 }
 
 function renderWeekly() {
@@ -366,6 +428,7 @@ function renderWeekly() {
   const index = list.findIndex((s) => s.id === selectedSlateId);
 
   $("week-label").textContent = slate ? slate.name : "No weeks yet";
+  $("week-state").textContent = "";
   $("week-prev").disabled = index <= 0;
   $("week-next").disabled = index < 0 || index >= list.length - 1;
 
@@ -376,6 +439,7 @@ function renderWeekly() {
   if (!hasPicks) return;
 
   const gamesById = new Map((slate.games ?? []).map((g) => [g.gameId, g]));
+  $("week-state").textContent = weekStateText(weekState(slate.users, gamesById));
   const me = getMe(slate);
   renderBoard(slate, me);
   renderYourWeek(slate, gamesById, me);
@@ -386,6 +450,7 @@ $("week-prev").addEventListener("click", () => {
   const list = slates();
   const i = list.findIndex((s) => s.id === selectedSlateId);
   if (i > 0) selectedSlateId = list[i - 1].id;
+  finalsOpen = false;
   renderWeekly();
 });
 
@@ -393,6 +458,7 @@ $("week-next").addEventListener("click", () => {
   const list = slates();
   const i = list.findIndex((s) => s.id === selectedSlateId);
   if (i >= 0 && i < list.length - 1) selectedSlateId = list[i + 1].id;
+  finalsOpen = false;
   renderWeekly();
 });
 
@@ -443,7 +509,9 @@ function populateAggregatesSelect(data) {
   const handles = Object.keys(data.byHandle ?? {}).sort((a, b) =>
     a.localeCompare(b, undefined, { sensitivity: "base" }),
   );
-  const previousValue = select.value || readStored(SELECTED_USER_STORAGE_KEY) || readStored(ME_STORAGE_KEY);
+  const me = readStored(ME_STORAGE_KEY);
+  const previousValue =
+    select.value || (me && me !== NOT_IN_GROUP ? me : null) || readStored(SELECTED_USER_STORAGE_KEY);
 
   select.innerHTML = handles.map((h) => `<option value="${esc(h)}">${esc(h)}</option>`).join("");
   if (handles.length === 0) return;
@@ -489,10 +557,22 @@ function populateWeekSelect(select, data) {
   select.value = list.some((s) => s.id === previousValue) ? previousValue : defaultSlateId(list);
 }
 
+const TREND_REASON = {
+  outnumbered: "You're outnumbered",
+  lock: "Group lock",
+  split: "Split",
+  consensus: "Agree",
+};
+
+// Per week, so 60s polls don't re-collapse a list you opened.
+let groupTrendsShowAllFor = null;
+
 function renderGroupTrends(slate) {
   const container = $("trends-group-content");
   const empty = $("trends-group-empty");
+  const more = $("trends-more");
   container.innerHTML = "";
+  more.hidden = true;
 
   if (!slate) {
     empty.hidden = false;
@@ -500,12 +580,20 @@ function renderGroupTrends(slate) {
   }
 
   const gamesById = new Map((slate.games ?? []).map((g) => [g.gameId, g]));
-  const trends = computeGroupTrends(slate.users ?? {}, gamesById);
+  const trends = rankGroupTrends(computeGroupTrends(slate.users ?? {}, gamesById), getMe(slate));
 
   empty.hidden = trends.length > 0;
   if (trends.length === 0) return;
 
-  for (const row of trends) {
+  const showAll = groupTrendsShowAllFor === slate.id || trends.length <= GROUP_TRENDS_SHOWN + 1;
+  if (trends.length > GROUP_TRENDS_SHOWN + 1) {
+    more.hidden = false;
+    more.setAttribute("aria-expanded", String(showAll));
+    more.textContent = showAll ? `Show top ${GROUP_TRENDS_SHOWN}` : `Show all ${trends.length} games`;
+    more.dataset.slate = slate.id;
+  }
+
+  for (const row of showAll ? trends : trends.slice(0, GROUP_TRENDS_SHOWN)) {
     const game = gamesById.get(row.gameId);
     const matchup = game ? gameHeaderLines(game).matchup : "?";
 
@@ -514,7 +602,12 @@ function renderGroupTrends(slate) {
 
     const matchupEl = document.createElement("div");
     matchupEl.className = "trend-matchup";
-    matchupEl.textContent = matchup;
+    const matchupText = document.createElement("span");
+    matchupText.textContent = matchup;
+    const reasonEl = document.createElement("span");
+    reasonEl.className = `trend-reason${row.reason === "outnumbered" ? " you" : ""}`;
+    reasonEl.textContent = TREND_REASON[row.reason];
+    matchupEl.append(matchupText, reasonEl);
     wrapper.appendChild(matchupEl);
 
     const labels = document.createElement("div");
@@ -659,6 +752,12 @@ function renderTrends() {
   renderPoolSeasonTrends(weeklyData);
 }
 
+$("trends-more").addEventListener("click", (e) => {
+  const id = e.currentTarget.dataset.slate;
+  groupTrendsShowAllFor = groupTrendsShowAllFor === id ? null : id;
+  renderGroupTrends(slates().find((s) => s.id === $("trends-select").value));
+});
+
 $("trends-select").addEventListener("change", (e) => {
   const slate = slates().find((s) => s.id === e.target.value);
   renderGroupTrends(slate);
@@ -711,7 +810,10 @@ function selectTab(tab) {
   for (const panel of document.querySelectorAll(".tab-panel")) {
     panel.hidden = panel.id !== `tab-${tab}`;
   }
-  if (location.hash.slice(1) !== tab) history.replaceState(null, "", `#${tab}`);
+  // A #tab in the URL is a one-time link; after that the saved tab (and the
+  // live-week rule below) decide, so drop it rather than let it stick.
+  if (location.hash) history.replaceState(null, "", location.pathname + location.search);
+  writeStored(TAB_STORAGE_KEY, tab);
   pollTab(tab);
 }
 
@@ -758,8 +860,26 @@ themeToggle.addEventListener("click", () => {
 darkQuery.addEventListener("change", renderThemeToggle);
 renderThemeToggle();
 
-const initialTab = tabButtons.some((b) => b.dataset.tab === location.hash.slice(1)) ? location.hash.slice(1) : "overall";
-selectTab(initialTab);
+// Opening tab: a #tab link wins; otherwise Weekly while a week is being
+// played (Saturday on a phone is the main case); otherwise wherever this
+// device was last, defaulting to Overall.
+async function chooseInitialTab() {
+  const isTab = (t) => tabButtons.some((b) => b.dataset.tab === t);
+  const hash = location.hash.slice(1);
+  if (isTab(hash)) return hash;
+  try {
+    weeklyData = await fetchJson("/api/weekly");
+    const slate = slates().find((s) => s.id === defaultSlateId(slates()));
+    const gamesById = new Map((slate?.games ?? []).map((g) => [g.gameId, g]));
+    if (slate && weekInProgress(slate.users, gamesById)) return "weekly";
+  } catch {
+    // Fall through to the saved tab; the poll will surface the failure.
+  }
+  const saved = readStored(TAB_STORAGE_KEY);
+  return isTab(saved) ? saved : "overall";
+}
+
+selectTab(await chooseInitialTab());
 setInterval(() => pollTab(activeTab), POLL_INTERVAL_MS);
 // Keep "Updated N min ago" honest between polls.
 setInterval(renderUpdated, 30_000);
