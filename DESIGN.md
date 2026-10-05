@@ -163,7 +163,7 @@ Density is tuned for a phone held one-handed during a game: 40-44px touch rows, 
 
 ## Colors
 
-A cool neutral grey world with one charcoal material, one amber "now" signal, a green/red pick-status pair, and a blue reserved for popularity. Every token is redefined in a `prefers-color-scheme: dark` block (overridable with `data-theme="light"`); the hex values below are the light theme.
+A cool neutral grey world with one charcoal material, one amber "now" signal, a green/red pick-status pair, and a blue reserved for popularity. Every token is redefined for dark, which follows the device (`prefers-color-scheme`) until the header's sun/moon toggle pins a choice: `data-theme="light"|"dark"` on `<html>`, saved per device in `localStorage` key `petz_theme` and applied by an inline head script before first paint. The hex values below are the light theme.
 
 ### Primary
 - **Broadcast Slate** (bar): the scoreboard material, used only by the score bugs (and the selected tab/switch via `sel-bg`). `bar-2` is the clock cell and team divider. Standings tables are white panels, not slate.
@@ -186,7 +186,7 @@ A cool neutral grey world with one charcoal material, one amber "now" signal, a 
 ### Named Rules
 **The Gold Is The Winner Rule.** Gold (`win-bg` row tint, `win-ink` trophy) marks only the leader: the week's rank-1 row on Weekly's "This week" table and the season's rank-1 row on Overall (ties share it, nobody gets it at 0 wins). A trophy icon replaces the rank number, with screen-reader text "Leading this week" / "Won the week" / "Season leader". Gold beats the "you" row tint when you lead. It is distinct from live amber and never appears without the trophy.
 
-**Quiet Tables Rule.** Standings are not scoreboards: Weekly's "This week", Overall and Team Picks all sit in a white ruled panel (`card`, `line` hairlines, 40px rows; Overall/Team Picks capped at 720px) with semibold 17px condensed records and regular-weight grey numbers. The slate bar is reserved for the score bugs. The leader uses `win-bg` with a `win-ink` trophy, and your row a faint `page` tint.
+**Quiet Tables Rule.** Standings are not scoreboards: Weekly's "This week", Overall and Team Picks all sit in a white ruled panel (`card`, `line` hairlines, 40px rows; Overall/Team Picks span the full column, matching the tab bar) with semibold 17px condensed records and regular-weight grey numbers. The slate bar is reserved for the score bugs. The leader uses `win-bg` with a `win-ink` trophy, and your row a faint `page` tint.
 
 **The Amber Is Now Rule.** Amber marks time-sensitive state only: a game in progress (live dot, clock quarter label, live tile border) and the stale-data warning. Never decoration, never a status.
 

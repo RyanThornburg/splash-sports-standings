@@ -58,6 +58,8 @@
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
 }
 
+/* Dark follows the device unless the header toggle picked a theme
+   (data-theme on <html>, set before first paint in index.html). */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
@@ -84,6 +86,32 @@
     --push-bg: #2a2d33;
     --accent: #7ea3f0;
   }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #121317;
+  --card: #1b1d22;
+  --line: #2c2f36;
+  --ink: #eef0f3;
+  --ink-2: #a9aeb8;
+  --ink-3: #8f949e;
+  --bar: #24272e;
+  --bar-2: #30343c;
+  --bar-3: #444954;
+  --win-bg: #2e2814;
+  --win-ink: #f2cd62;
+  --on-solid: #121317;
+  --sel-bg: #eef0f3;
+  --sel-ink: #121317;
+  --live-ink: #f5b84d;
+  --live-bg: #33270f;
+  --good: #5cc98a;
+  --good-bg: #16301f;
+  --bad: #f08a80;
+  --bad-bg: #3a1c1a;
+  --push-bg: #2a2d33;
+  --accent: #7ea3f0;
 }
 
 * {
@@ -146,6 +174,30 @@ h1 {
   font-size: 13px;
   color: var(--ink-2);
   white-space: nowrap;
+}
+
+.header-end {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  align-self: center;
+}
+
+.theme-toggle {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  color: var(--ink);
 }
 
 .stale-banner {
@@ -433,10 +485,9 @@ h1 {
   text-underline-offset: 2px;
 }
 
-/* Overall and Team Picks: a quiet ruled table on a white panel. The
-   scoreboard slate stays with Weekly; season totals read calmer. */
+/* Overall and Team Picks: a quiet ruled table on a white panel, full
+   column width so it lines up with the tab bar. */
 .board-scroll {
-  max-width: 720px;
   overflow-x: auto;
   border: 1px solid var(--line);
   border-radius: 10px;

@@ -5,13 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Petz Pool</title>
     <link rel="preload" href="/fonts/barlow-semi-condensed-700.woff2" as="font" type="font/woff2" crossorigin />
+    <script>
+      // Apply a saved theme choice before first paint (no flash). With
+      // nothing saved, style.css follows the device's colour scheme.
+      try {
+        const t = localStorage.getItem("petz_theme");
+        if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+      } catch {}
+    </script>
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
     <main>
       <header class="site-header">
         <h1>Petz Pool</h1>
-        <p id="updated" class="updated" aria-live="polite"></p>
+        <div class="header-end">
+          <p id="updated" class="updated" aria-live="polite"></p>
+          <button type="button" id="theme-toggle" class="theme-toggle"></button>
+        </div>
       </header>
       <p id="stale-banner" class="stale-banner" role="status" hidden></p>
 
