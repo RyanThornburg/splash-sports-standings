@@ -11,6 +11,16 @@ Using one Cloudflare worker to handle everything:
 - server the api routes (`/api/*`)
 - host the frontend (`public/`)
 
+## Screenshots
+
+Names and the pool name below are made up; the games, scores and picks are real data from one Saturday.
+
+![Weekly tab on desktop during live games](docs/screenshots/weekly-desktop.png)
+
+| Weekly (my picks) | Overall | Trends |
+| --- | --- | --- |
+| <img src="docs/screenshots/weekly-games-phone.png" width="250" alt="Weekly tab on a phone, score bugs with each friend's pick"> | <img src="docs/screenshots/overall-phone.png" width="250" alt="Overall season standings on a phone"> | <img src="docs/screenshots/trends-phone.png" width="250" alt="Trends tab on a phone, where the group splits"> |
+
 ## Prerequisites
 
 - Node.js and npm

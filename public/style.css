@@ -1134,11 +1134,12 @@ h1 {
     margin-top: 0;
   }
 
-  /* Tiles take the panel's free height so the strip carries the same
-     weight as the board beside it. */
+  /* Fill the card, but cap tile height so a short week (one row) doesn't
+     stretch tiles to several times their phone height. */
   .week-top .tiles {
     flex: 1;
-    grid-auto-rows: 1fr;
+    grid-auto-rows: minmax(44px, 64px);
+    align-content: center;
   }
 
   .week-top .tile {
@@ -1158,6 +1159,27 @@ h1 {
 }
 
 @media (max-width: 420px) {
+  /* Overall's 6-7 columns overflow a 390px iPhone at the default padding,
+     and a 375px one needs a slightly smaller name too. */
+  .board-table th,
+  .board-table td {
+    padding: 0 4px;
+  }
+
+  .board-table th:first-child,
+  .board-table td:first-child {
+    padding-left: 10px;
+  }
+
+  .board-table th:last-child,
+  .board-table td:last-child {
+    padding-right: 10px;
+  }
+
+  .board-table td.name {
+    font-size: 14px;
+  }
+
   .tab-button {
     padding: 0 4px;
     font-size: 14px;

@@ -162,7 +162,7 @@ function renderStandings(data) {
       const classes = [leader ? "win" : "", entry.handle === me ? "me" : ""].join(" ").trim();
       const cells = [
         `<td class="rk">${leader ? trophyRank("Season leader") : esc(groupRankLabel)}</td>`,
-        `<td>${esc(entry.displayName ?? entry.handle)}</td>`,
+        `<td class="name">${esc(entry.displayName ?? entry.handle)}</td>`,
         `<td class="rec">${esc(recordText(entry))}</td>`,
         `<td class="num col-num">${esc(winPct(entry))}</td>`,
       ];
