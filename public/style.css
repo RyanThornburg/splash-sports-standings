@@ -841,23 +841,6 @@ h1 {
   scroll-margin-top: 72px;
 }
 
-.mytag {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  margin: 0 0 6px 2px;
-  font: 700 12px var(--cond);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-}
-
-.mytag b {
-  font: 700 15px var(--cond);
-  letter-spacing: 0.02em;
-  color: var(--ink);
-}
-
 .bug {
   display: grid;
   grid-template-columns: 1fr 1fr 70px;
@@ -904,6 +887,23 @@ h1 {
 
 .team.trail .score {
   color: var(--on-bar-2);
+}
+
+/* Your side: a bar along the bottom of the team cell, like a broadcast
+   possession marker. Neutral, not green/red, since it means "you", not status. */
+.team {
+  position: relative;
+}
+
+.team.mine::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 6px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--on-bar);
 }
 
 .clock {
@@ -1029,10 +1029,6 @@ h1 {
   border-top: 0;
 }
 
-.frow .mytag {
-  margin: 0 0 6px;
-}
-
 .fline,
 .fchips {
   display: grid;
@@ -1063,6 +1059,12 @@ h1 {
 
 .ft .score {
   font-size: 20px;
+}
+
+.ft.mine {
+  margin-bottom: -5px;
+  padding-bottom: 5px;
+  box-shadow: inset 0 -3px 0 var(--ink);
 }
 
 .ft.lose .abbr,
@@ -1153,21 +1155,6 @@ h1 {
   .week-top .tile .a {
     font-size: 15px;
   }
-}
-
-.games-key {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 14px;
-  margin: -4px 2px 12px;
-  font-size: 13px;
-  color: var(--ink-2);
-}
-
-.games-key span {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
 }
 
 @media (max-width: 420px) {

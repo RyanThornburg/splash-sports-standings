@@ -219,11 +219,10 @@ function teamName(team) {
 
 const gameAnchor = (gameId) => `g-${gameId}`;
 
-function myTag(myPick) {
-  return myPick
-    ? `<div class="mytag">Your pick <b>${esc(myPick.team.alias)} ${esc(formatSpread(myPick.spread))}</b></div>`
-    : "";
-}
+// Your side of a game gets a bar under its team cell instead of a separate
+// "Your pick" line, so every bug is the same height and two-up rows line up.
+const mineClass = (t, myPick) => (myPick?.team.alias === t.alias ? " mine" : "");
+const mineLabel = (t, myPick) => (myPick?.team.alias === t.alias ? `<span class="sr-only">, your pick</span>` : "");
 
 function kickoff(game) {
   const d = new Date(game.startsAt);
@@ -241,8 +240,8 @@ function scoreBug(game, picks, me, myPick) {
   const scheduled = game.status === "scheduled";
   const team = (t, other) => {
     const trail = !scheduled && t.score != null && other.score != null && t.score < other.score;
-    return `<div class="team${trail ? " trail" : ""}">
-      <span>${teamName(t)}</span><span class="sprd">${esc(formatSpread(t.spread))}</span>
+    return `<div class="team${trail ? " trail" : ""}${mineClass(t, myPick)}">
+      <span>${teamName(t)}${mineLabel(t, myPick)}</span><span class="sprd">${esc(formatSpread(t.spread))}</span>
       <span class="score">${scheduled ? "" : esc(t.score ?? "")}</span></div>`;
   };
   let clock;
@@ -255,7 +254,6 @@ function scoreBug(game, picks, me, myPick) {
     clock = `<div class="clock"><span class="q">Live</span></div>`;
   }
   return `<article class="game" id="${gameAnchor(game.gameId)}" aria-label="${esc(game.away.name)} at ${esc(game.home.name)}">
-    ${myTag(myPick)}
     <div class="bug">${team(game.away, game.home)}${team(game.home, game.away)}${clock}</div>
     <div class="sides">${sideChips(picks, game.away.alias, game, me)}${sideChips(picks, game.home.alias, game, me)}</div>
   </article>`;
@@ -263,13 +261,12 @@ function scoreBug(game, picks, me, myPick) {
 
 function finalRow(game, picks, me, myPick) {
   const ft = (t, o) =>
-    `<div class="ft${t.score < o.score ? " lose" : ""}"><span>${teamName(t)} <span class="sprd">${esc(formatSpread(t.spread))}</span></span><span class="score">${esc(t.score ?? "")}</span></div>`;
+    `<div class="ft${t.score < o.score ? " lose" : ""}${mineClass(t, myPick)}"><span>${teamName(t)}${mineLabel(t, myPick)} <span class="sprd">${esc(formatSpread(t.spread))}</span></span><span class="score">${esc(t.score ?? "")}</span></div>`;
   const side = (alias) => {
     const list = picks.filter((p) => p.pick.team.alias === alias).sort((a, b) => (b.handle === me) - (a.handle === me));
     return `<div class="side">${list.map((p) => chip(p.handle, p.pick, game, me)).join("")}</div>`;
   };
   return `<div class="frow" id="${gameAnchor(game.gameId)}">
-    ${myTag(myPick)}
     <div class="fline">${ft(game.away, game.home)}${ft(game.home, game.away)}<span class="ftag">Final</span></div>
     <div class="fchips">${side(game.away.alias)}${side(game.home.alias)}</div>
   </div>`;
@@ -361,10 +358,7 @@ function renderGames(slate, gamesById, me) {
     for (const b of segwrap.querySelectorAll("button")) b.setAttribute("aria-pressed", String(b.dataset.mode === mode));
   }
 
-  // In My picks every game is yours and your solid chip already says which
-  // side, so the "Your pick" tag only earns its line in All games.
-  const myPickFor = (gameId) =>
-    me && mode === "all" ? byGame.get(gameId)?.find((p) => p.handle === me)?.pick : null;
+  const myPickFor = (gameId) => (me ? byGame.get(gameId)?.find((p) => p.handle === me)?.pick : null);
   const fill = (key, games, render) => {
     $(`sec-${key}`).hidden = games.length === 0;
     $(`count-${key}`).textContent = games.length;
@@ -372,9 +366,6 @@ function renderGames(slate, gamesById, me) {
       .map((g) => render(g, byGame.get(g.gameId) ?? [], me, myPickFor(g.gameId)))
       .join("");
   };
-  $("games-key").innerHTML =
-    `<span>${ICON.up}covering</span><span>${ICON.down}not covering</span>` +
-    (me ? `<span>solid chip = you</span>` : "");
   fill("live", shown.live, scoreBug);
   fill("later", shown.later, scoreBug);
   fill("final", shown.final, finalRow);

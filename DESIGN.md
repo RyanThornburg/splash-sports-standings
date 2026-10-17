@@ -193,7 +193,7 @@ page #121317, card #1b1d22, line #2c2f36, ink #eef0f3, ink-2 #a9aeb8, ink-3 #8f9
 
 **The Amber Is Now Rule.** Amber marks time-sensitive state only: a game in progress (live dot, clock quarter label, live tile border) and the stale-data warning. Never decoration, never a status.
 
-**The Never Color Alone Rule.** Green and red appear only on pick status and always beside a drawn SVG icon: check (won), x (lost), up triangle (covering), down triangle (not covering), dash (push or tied), ring (not started). A legend of the same icons accompanies the tile strip and the live section.
+**The Never Color Alone Rule.** Green and red appear only on pick status and always beside a drawn SVG icon: check (won), x (lost), up triangle (covering), down triangle (not covering), dash (push or tied), ring (not started). A legend of the same icons accompanies the tile strip (the live section has none; the icons are learned there).
 
 **The Blue Is Count Rule.** The accent blue measures popularity and nothing else. Season-long pool trends carry no status color at all.
 
@@ -211,7 +211,7 @@ page #121317, card #1b1d22, line #2c2f36, ink #eef0f3, ink-2 #a9aeb8, ink-3 #8f9
 - **Numeral** (700, 18-21px, tabular): W-L records (20px), ranks (18px), team abbreviations (21px in bugs, 17px in finals), stat values.
 - **Body** (400, 15px, 1.4): notes, empty states, keys (12-13px, ink-2/ink-3).
 - **Name** (500-600, 13-15px, system-ui): handles in the board and on chips (13px chips, 700 on your own chip).
-- **Label** (600-700, 12px, 0.08em, uppercase): board column heads, clock quarter, "Your pick" tag, stat units, "Final".
+- **Label** (600-700, 12px, 0.08em, uppercase): board column heads, clock quarter, stat units, "Final".
 
 ### Named Rules
 **The Two Voices Rule.** Condensed for numerals, abbreviations, labels and uppercase titles; system-ui for names and body. Never set a handle in the condensed face, and never set a score in the sans.
@@ -242,7 +242,7 @@ Two corner sizes do most of the work: 10px on outer objects (bugs, boards, panel
 ## Components
 
 ### Score Bug (signature)
-The broadcast bar for one game. Charcoal, 58px, 10px corners, clipped. Each team cell holds an optional top-25 rank (12px, on-bar-2), the abbreviation, the spread (13px, on-bar-2) and the score; the trailing team's score dims to on-bar-2. The clock cell (bar-2) stacks quarter over time; the quarter is amber when live, on-bar-2 for a scheduled day/time. Above the bug, a "Your pick" tag names your team and spread when you picked the game.
+The broadcast bar for one game. Charcoal, 58px, 10px corners, clipped. Each team cell holds an optional top-25 rank (12px, on-bar-2), the abbreviation, the spread (13px, on-bar-2) and the score; the trailing team's score dims to on-bar-2. The clock cell (bar-2) stacks quarter over time; the quarter is amber when live, on-bar-2 for a scheduled day/time. When you picked the game, your team's cell gets a 3px on-bar underline inset 12px from its sides (6px from the bottom), and in a final row your team gets a 3px ink underline. Neutral, never green/red: it means "you", not status. Every bug is the same height so two-up rows line up; don't add lines above the bug.
 
 ### Chips
 - **Style:** 26px pills (24px in finals), 1.5px hairline outline, transparent fill, 13px system-ui name with a 12px status icon leading.
