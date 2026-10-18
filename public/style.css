@@ -861,16 +861,25 @@ h1 {
   border-right: 1px solid var(--bar-2);
 }
 
+/* Center the rank on the abbreviation the same way the grid centers the
+   spread, so both small grey labels sit at one height. */
+.team > span:first-child {
+  display: flex;
+  align-items: center;
+}
+
 .abbr {
   font: 700 21px/1 var(--cond);
   letter-spacing: 0.02em;
 }
 
+/* Same small grey type as the spread, inline with the team name like a
+   broadcast bug's "12 OSU", not raised as a superscript. */
 .rank {
-  margin-right: 2px;
-  font: 600 12px/1 var(--cond);
+  margin-right: 4px;
+  font: 500 13px/1 var(--cond);
+  letter-spacing: 0.02em;
   color: var(--on-bar-2);
-  vertical-align: top;
 }
 
 .sprd {

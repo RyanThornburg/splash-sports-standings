@@ -242,7 +242,7 @@ Two corner sizes do most of the work: 10px on outer objects (bugs, boards, panel
 ## Components
 
 ### Score Bug (signature)
-The broadcast bar for one game. Charcoal, 58px, 10px corners, clipped. Each team cell holds an optional top-25 rank (12px, on-bar-2), the abbreviation, the spread (13px, on-bar-2) and the score; the trailing team's score dims to on-bar-2. The clock cell (bar-2) stacks quarter over time; the quarter is amber when live, on-bar-2 for a scheduled day/time. When you picked the game, your team's cell gets a 3px on-bar underline inset 12px from its sides (6px from the bottom), and in a final row your team gets a 3px ink underline. Neutral, never green/red: it means "you", not status. Every bug is the same height so two-up rows line up; don't add lines above the bug.
+The broadcast bar for one game. Charcoal, 58px, 10px corners, clipped. Each team cell holds an optional top-25 rank, the abbreviation, the spread and the score. Rank and spread share one style (13px, 500, on-bar-2) and both sit level with the abbreviation (centered on it in the bug, on its baseline in a final row; the rank is never raised as a superscript); the trailing team's score dims to on-bar-2. The clock cell (bar-2) stacks quarter over time; the quarter is amber when live, on-bar-2 for a scheduled day/time. When you picked the game, your team's cell gets a 3px on-bar underline inset 12px from its sides (6px from the bottom), and in a final row your team gets a 3px ink underline. Neutral, never green/red: it means "you", not status. Every bug is the same height so two-up rows line up; don't add lines above the bug.
 
 ### Chips
 - **Style:** 26px pills (24px in finals), 1.5px hairline outline, transparent fill, 13px system-ui name with a 12px status icon leading.
