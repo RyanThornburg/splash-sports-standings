@@ -5,6 +5,8 @@ import {
   computePoolPickCounts,
   computeTeamAggregates,
   fetchSlateWeeks,
+  spreadSlates,
+  type Slate,
   type WeeklyEntryResult,
   type WeeklyPick,
 } from "../src/picks";
@@ -195,5 +197,35 @@ describe("fetchSlateWeeks", () => {
 
     expect(result.get("Rattly")?.potentialPoints).toBe(11);
     expect(result.get("Rattly")?.picks).toEqual([]);
+  });
+});
+
+describe("spreadSlates", () => {
+  const slate = (id: string, overrides: Partial<Slate> = {}): Slate => ({
+    id,
+    name: id,
+    status: "scheduled",
+    isCurrentSlate: false,
+    pickLockDate: "2026-11-15T04:00:00.000Z",
+    settledDate: null,
+    picksRequiredCount: 20,
+    ...overrides,
+  });
+
+  it("returns the current week and the one after it", () => {
+    const slates = [
+      slate("w10", { status: "settled", settledDate: "2026-11-09" }),
+      slate("w11", { status: "in_progress", isCurrentSlate: true }),
+      slate("w12"),
+      slate("w13"),
+    ];
+
+    expect(spreadSlates(slates).map((s) => s.id)).toEqual(["w11", "w12"]);
+  });
+
+  it("skips a current week that has already settled", () => {
+    const slates = [slate("w11", { isCurrentSlate: true, settledDate: "2026-11-16" }), slate("w12"), slate("w13")];
+
+    expect(spreadSlates(slates).map((s) => s.id)).toEqual(["w12", "w13"]);
   });
 });

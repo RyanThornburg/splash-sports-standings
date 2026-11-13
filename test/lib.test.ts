@@ -4,11 +4,24 @@ import {
   computePoolTopPicks,
   computeSeasonPoolTopTeams,
   computeWeeklyPending,
+  bookNames,
+  defaultLinesSlateId,
+  linesBook,
   defaultSlateId,
   FINISHED_STATUSES,
   formatSpread,
   gameHeaderLines,
   isLiveGame,
+  kickoffDays,
+  lineEdge,
+  lineText,
+  linesSections,
+  linesWeekState,
+  paidGroups,
+  valuePick,
+  valueResult,
+  valueTally,
+  valueTier,
   pickCellClass,
   picksByGame,
   pickStatus,
@@ -546,5 +559,213 @@ describe("weekState / weekInProgress", () => {
 
   it("is null with no picks", () => {
     expect(weekState({}, new Map())).toBeNull();
+  });
+});
+
+describe("Lines helpers", () => {
+  // Spreads from the home side, like Splash's picksheet and the Worker's
+  // flipped market line.
+  const game = (id: string, splashHome: number | null, marketHome?: number, startsAt = "2026-11-14T17:00:00Z") => ({
+    gameId: id,
+    startsAt,
+    home: { alias: "PITT", name: "Pittsburgh", spread: splashHome },
+    away: { alias: "FSU", name: "Florida State", spread: splashHome == null ? null : -splashHome },
+    market: marketHome === undefined ? null : { provider: "DraftKings", spread: marketHome },
+  });
+
+  describe("lineText", () => {
+    it("formats a home-side spread with a real minus, PK at zero", () => {
+      expect(lineText(-3.5)).toBe("\u22123.5");
+      expect(lineText(10.5)).toBe("+10.5");
+      expect(lineText(0)).toBe("PK");
+      expect(lineText(null)).toBeNull();
+    });
+  });
+
+  describe("lineEdge", () => {
+    it("gives the away team the edge when Splash makes home a bigger favourite than the market", () => {
+      // Splash PITT -3.5, market PITT -2.5: FSU +3.5 on Splash is a point better.
+      expect(lineEdge(game("g", -3.5, -2.5))).toMatchObject({ team: { alias: "FSU" }, points: 1 });
+    });
+
+    it("gives the home team the edge when the market moved toward them", () => {
+      // Real Nov 2026 case: Splash OKLA +1.5, market OKLA -1.5.
+      expect(lineEdge(game("g", 1.5, -1.5))).toMatchObject({ team: { alias: "PITT" }, points: 3 });
+    });
+
+    it("is zero-with-no-team when they agree, null without a market line", () => {
+      expect(lineEdge(game("g", -3, -3))).toEqual({ team: null, points: 0 });
+      expect(lineEdge(game("g", -3))).toBeNull();
+    });
+  });
+
+  describe("bookNames / linesBook", () => {
+    it("maps either spelling of a known book to its full and short names", () => {
+      expect(bookNames("DraftKings")).toEqual({ full: "DraftKings", short: "DK" });
+      expect(bookNames("Draft Kings")).toEqual({ full: "DraftKings", short: "DK" });
+      expect(bookNames("Some Book")).toEqual({ full: "Some Book", short: "Some Book" });
+      expect(bookNames("Market")).toBeNull();
+      expect(bookNames(undefined)).toBeNull();
+    });
+
+    it("uses this week's book, else any week's, else null", () => {
+      const slates = [
+        { id: "w11", games: [game("a", -3, -3)] },
+        { id: "w12", games: [game("b", -3)] },
+      ];
+      expect(linesBook(slates, "w11")).toEqual({ full: "DraftKings", short: "DK" });
+      // Week 12 has no market lines yet; borrow week 11's book.
+      expect(linesBook(slates, "w12")).toEqual({ full: "DraftKings", short: "DK" });
+      expect(linesBook([{ id: "w12", games: [game("b", -3)] }], "w12")).toBeNull();
+    });
+  });
+
+  describe("valuePick / valueTier", () => {
+    it("states the bet from the value side's own line", () => {
+      // Splash PITT -15.5, DK PITT -17.5: DK makes PITT a bigger favourite,
+      // so Splash's PITT -15.5 is 2 points cheaper.
+      const pick = valuePick(game("g", -15.5, -17.5));
+      expect(pick).toMatchObject({ team: { alias: "PITT" }, splash: -15.5, market: -17.5, points: 2, flip: false });
+      expect(valueTier(pick)).toBe("best");
+    });
+
+    it("reads an away-side edge from the away team's side", () => {
+      // Splash PITT -10.5, DK PITT -7.5: FSU +10.5 on Splash vs +7.5.
+      expect(valuePick(game("g", -10.5, -7.5))).toMatchObject({ team: { alias: "FSU" }, splash: 10.5, market: 7.5, keyNumbers: [10] });
+    });
+
+    it("flags a flipped favourite", () => {
+      expect(valuePick(game("g", 1.5, -1.5))).toMatchObject({ flip: true, points: 3 });
+    });
+
+    it("counts a key number when the extra points turn a loss into a push or a push into a cover", () => {
+      // FSU +3 vs +2: losing by 3 is a push on Splash, a loss at DK.
+      expect(valuePick(game("g", -3, -2))!.keyNumbers).toEqual([3]);
+      // PITT -2.5 vs -3: winning by 3 covers on Splash, pushes at DK.
+      expect(valuePick(game("g", -2.5, -3))!.keyNumbers).toEqual([3]);
+      // FSU +6 vs +5 crosses nothing.
+      expect(valuePick(game("g", -6, -5))!.keyNumbers).toEqual([]);
+    });
+
+    it("tiers 1-1.5 point edges and half points across a key number as small, plain half points as nothing", () => {
+      expect(valueTier(valuePick(game("g", -6, -5)))).toBe("small");
+      expect(valueTier(valuePick(game("g", -2.5, -3)))).toBe("small");
+      // A full point across 7 is best.
+      expect(valueTier(valuePick(game("g", -7.5, -6.5)))).toBe("best");
+      expect(valueTier(valuePick(game("g", -6, -5.5)))).toBeNull();
+      expect(valueTier(valuePick(game("g", -3, -3)))).toBeNull();
+      expect(valuePick(game("g", -3))).toBeNull();
+    });
+  });
+
+  describe("linesSections", () => {
+    const now = Date.parse("2026-11-14T12:00:00Z");
+
+    it("splits upcoming games into best, small and other (each in kickoff order), and grades kicked-off value games", () => {
+      const games = [
+        game("late-even", -3, -3, "2026-11-15T00:00:00Z"),
+        game("small", -6, -5, "2026-11-14T20:00:00Z"),
+        game("big", -3, 0, "2026-11-14T23:00:00Z"),
+        game("early-best", -3, -1, "2026-11-14T13:00:00Z"),
+        game("key-half", -2.5, -3, "2026-11-14T19:00:00Z"),
+        game("half", -6, -5.5, "2026-11-14T16:00:00Z"),
+        game("started", -3, 0, "2026-11-14T11:00:00Z"),
+        game("started-even", -3, -3, "2026-11-14T11:30:00Z"),
+        game("no-market", -3, undefined, "2026-11-14T18:00:00Z"),
+      ];
+
+      const s = linesSections(games, now);
+      const ids = (rows: { game: { gameId: string } }[]) => rows.map((r) => r.game.gameId);
+
+      // Kickoff order, not biggest gap first: early-best (2 pts) before big (3).
+      expect(ids(s.best)).toEqual(["early-best", "big"]);
+      expect(ids(s.small)).toEqual(["key-half", "small"]);
+      expect(ids(s.other)).toEqual(["half", "no-market", "late-even"]);
+      expect(ids(s.paid)).toEqual(["started"]);
+    });
+  });
+
+  describe("kickoffDays", () => {
+    it("groups rows by calendar day, labelling today and tomorrow", () => {
+      const now = Date.parse("2026-11-13T15:00:00Z");
+      const rows = [
+        { game: game("fri", -3, -3, "2026-11-13T19:00:00Z") },
+        { game: game("sat1", -3, -3, "2026-11-14T17:00:00Z") },
+        { game: game("sat2", -3, -3, "2026-11-14T20:00:00Z") },
+        { game: game("sun", -3, -3, "2026-11-15T17:00:00Z") },
+      ];
+
+      const days = kickoffDays(rows, now);
+
+      expect(days.map((d) => d.rows.map((r: { game: { gameId: string } }) => r.game.gameId))).toEqual([["fri"], ["sat1", "sat2"], ["sun"]]);
+      expect(days[0].label).toMatch(/^Today · /);
+      expect(days[1].label).toMatch(/^Tomorrow · /);
+      expect(days[2].label).not.toMatch(/Today|Tomorrow/);
+    });
+  });
+
+  describe("valueResult / valueTally", () => {
+    const finalGame = (home: number | null, away: number | null) => ({
+      ...game("g", -3, -4),
+      status: "finalized",
+      home: { alias: "PITT", name: "Pittsburgh", spread: -3, score: home },
+      away: { alias: "FSU", name: "Florida State", spread: 3, score: away },
+    });
+    const row = (g: ReturnType<typeof finalGame>) => ({ game: g, pick: valuePick(g) });
+
+    it("grades the value side at Splash's line and notices when the extra points decided it", () => {
+      // PITT -3 on Splash (DK -4), wins by 3: push on Splash, a loss at DK.
+      expect(valueResult(row(finalGame(24, 21)))).toMatchObject({ tone: "push", label: "Push", final: true, extraPointsMattered: true, atMarket: "lost" });
+      // Loses outright: "Didn't cover", not the vaguer "Missed".
+      expect(valueResult(row(finalGame(10, 21)))).toMatchObject({ tone: "bad", label: "Didn't cover" });
+      // Wins by 9: covers either way.
+      expect(valueResult(row(finalGame(30, 21)))).toMatchObject({ tone: "good", label: "Covered", extraPointsMattered: false });
+    });
+
+    it("reads a live game as covering or not, never final", () => {
+      const live = { ...finalGame(14, 0), status: "in_progress" };
+      expect(valueResult(row(live))).toMatchObject({ tone: "good", live: true, label: "Covering", final: false });
+    });
+
+    it("groups kicked-off value picks live, final, then waiting", () => {
+      const live = { ...finalGame(14, 0), gameId: "live", status: "in_progress" };
+      const done = { ...finalGame(30, 21), gameId: "done" };
+      const waiting = { ...finalGame(null, null), gameId: "wait", status: "scheduled" };
+      const groups = paidGroups([row(done), row(waiting), row(live)]);
+      const ids = (rows: { game: { gameId: string } }[]) => rows.map((r) => r.game.gameId);
+      expect({ live: ids(groups.live), final: ids(groups.final), waiting: ids(groups.waiting) }).toEqual({ live: ["live"], final: ["done"], waiting: ["wait"] });
+    });
+
+    it("tallies finished value picks", () => {
+      const rows = [row(finalGame(24, 21)), row(finalGame(30, 21)), row(finalGame(10, 21)), row({ ...finalGame(7, 0), status: "in_progress" })];
+      expect(valueTally(rows)).toEqual({ wins: 1, losses: 1, ties: 1, decided: 1 });
+    });
+  });
+
+  describe("linesWeekState", () => {
+    it("counts games still to kick off and finds the next one", () => {
+      const now = Date.parse("2026-11-14T12:00:00Z");
+      const games = [game("a", -3, -3, "2026-11-14T11:00:00Z"), game("b", -3, -3, "2026-11-14T20:00:00Z"), game("c", -3, -3, "2026-11-14T17:00:00Z")];
+      expect(linesWeekState(games, now)).toEqual({ toGo: 2, next: "2026-11-14T17:00:00.000Z" });
+      expect(linesWeekState([games[0]], now)).toBeNull();
+    });
+  });
+
+  describe("defaultLinesSlateId", () => {
+    const now = Date.parse("2026-11-16T12:00:00Z");
+
+    it("opens on the first week with a game still to kick off", () => {
+      const slates = [
+        { id: "w11", games: [game("a", -3, -3, "2026-11-15T00:00:00Z")] },
+        { id: "w12", games: [game("b", -3, -3, "2026-11-21T17:00:00Z")] },
+      ];
+      expect(defaultLinesSlateId(slates, now)).toBe("w12");
+    });
+
+    it("falls back to the latest week when everything has kicked off", () => {
+      const slates = [{ id: "w11", games: [game("a", -3, -3, "2026-11-15T00:00:00Z")] }];
+      expect(defaultLinesSlateId(slates, now)).toBe("w11");
+      expect(defaultLinesSlateId([], now)).toBeNull();
+    });
   });
 });

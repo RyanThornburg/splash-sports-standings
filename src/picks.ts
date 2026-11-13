@@ -4,7 +4,7 @@ const SLATES_URL = "https://api.splashsports.com/contests-service-v2/api/contest
 const LEADERBOARD_URL = "https://api.splashsports.com/contests-service-v2/api/leaderboards";
 const PICKSHEETS_URL = "https://api.splashsports.com/contests-service-v2/api/team-pickem/picksheets";
 
-interface Slate {
+export interface Slate {
   id: string;
   name: string;
   status: string;
@@ -30,6 +30,15 @@ export async function fetchSlates(idToken: string, contestId: string): Promise<S
   }
 
   return ((await response.json()) as SlatesResponse).data;
+}
+
+// The current week plus the next one, skipping anything already settled.
+// The next week matters most: Splash posts its lines days before kickoff,
+// and that's when there's still time to shop them.
+export function spreadSlates(slates: Slate[]): Slate[] {
+  const open = slates.filter((s) => s.settledDate === null);
+  const current = open.findIndex((s) => s.isCurrentSlate);
+  return open.slice(Math.max(current, 0), Math.max(current, 0) + 2);
 }
 
 // "winning"/"losing" are Splash's own values for any in-progress game, 

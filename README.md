@@ -104,5 +104,6 @@ Two ways to refresh:
 - `src/auth.ts`: refresh-token-based auth
 - `src/splash.ts`: season leaderboard fetch/pagination + the CloudFront browser-header workaround required by `api.splashsports.com`.
 - `src/picks.ts`: slates (weeks), per-entry weekly picks, game catalog, and the team-pick logic
+- `src/odds.ts`: market spreads/totals for the Lines tab, from ESPN's free college football scoreboard (DraftKings lines, opening and current, no API key), matched to Splash's games
 - `src/index.ts`: the `scheduled()` cron handler (orchestrates the refresh and writes KV), `fetch()` handler (serves `/api/*` + static assets), and the `ADMIN_TOKEN` protected `POST /api/refresh-token` the bookmark calls.
 - `public/`: plain HTML/JS/CSS frontend, no build step. Polls `/api/*` every 60 seconds.

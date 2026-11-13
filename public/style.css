@@ -233,7 +233,9 @@ h1 {
 
 .tab-button {
   flex: 1 1 0;
-  min-width: 0;
+  /* Never narrower than the label: tabs overlapped ("TEAM PICKSTRENDS")
+     when allowed to shrink. The tray scrolls before that can happen. */
+  min-width: max-content;
   min-height: 40px;
   padding: 0 8px;
   white-space: nowrap;
@@ -245,6 +247,31 @@ h1 {
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--ink-2);
+}
+
+/* "Team Picks" is "Teams" below 600px: five equal tabs only fit the long
+   label from about there up (it clipped at 430px). */
+.tab-button .tab-short {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .tab-button .tab-long {
+    display: none;
+  }
+
+  .tab-button .tab-short {
+    display: inline;
+  }
+}
+
+/* The smallest phones (320px): a size down so the tray doesn't scroll. */
+@media (max-width: 340px) {
+  /* .tabs prefix: outranks the later 420px block's 14px. */
+  .tabs .tab-button {
+    font-size: 13px;
+    letter-spacing: 0.02em;
+  }
 }
 
 .tab-button:hover {
@@ -1190,6 +1217,8 @@ h1 {
   }
 
   .tab-button {
+    /* Five tabs: size each to its label on phones. */
+    flex: 1 1 auto;
     padding: 0 4px;
     font-size: 14px;
     letter-spacing: 0.03em;
@@ -1394,6 +1423,358 @@ h1 {
   height: 100%;
   border-radius: 5px;
   background: var(--accent);
+}
+
+/* ---- Lines (Splash vs market) ----
+   Quiet Tables Rule: white ruled panel, condensed numerals. The value pill
+   is neutral ink, never green/red (those mean pick status) or blue
+   (popularity). Only "Did value pay?" uses green/red, because grading the
+   value side IS a pick status, and always with the drawn icons. */
+
+/* A reading column, not a 1080px spreadsheet: five short columns spread
+   that wide leave the pills drifting in empty space. */
+.tab-panel.lines {
+  max-width: 760px;
+  margin-inline: auto;
+}
+
+/* The grey heading counts are ink-3 on the page tint, 4.2:1. Lines leans on
+   them ("Best value 5", "Did value pay? 13-5"), so step them up to ink-2. */
+.tab-panel.lines .section-title .count {
+  color: var(--ink-2);
+}
+
+/* A tier's one-line definition, under its heading. Full column width, like
+   the tables, buttons and the rest of the notes (a 68ch cap looked like a
+   ragged gap in the 760px column; the user preferred the full width). */
+.ln-desc {
+  margin: -4px 2px 10px;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+/* "DK −14 would've pushed" under a graded result wraps on a phone instead
+   of pushing the table wide. */
+.paid-table td:nth-child(3) .ln-sub {
+  white-space: normal;
+}
+
+/* Game-day strip: "Value picks 3-9 · extra points decided 2 · 1 live",
+   a white tray (like the week nav) that jumps to "Did value pay?". */
+.lines-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  margin-top: 10px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--ink);
+  font: 600 15px var(--cond);
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+}
+
+.lines-strip:hover {
+  border-color: var(--ink);
+}
+
+.lines-strip .ls-label {
+  white-space: nowrap;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.lines-strip .ls-parts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 6px;
+}
+
+.lines-strip .ls-parts b {
+  font-size: 17px;
+}
+
+.lines-strip .ls-part {
+  white-space: nowrap;
+}
+
+.lines-strip .ls-sep {
+  margin-right: 6px;
+  color: var(--ink-3);
+}
+
+@media (max-width: 599px) {
+  .lines-strip .ls-wide {
+    display: none;
+  }
+}
+
+.lines-strip .livedot,
+.lines-table .ln-day .livedot {
+  display: inline-block;
+  margin-right: 5px;
+  vertical-align: 1px;
+}
+
+.lines-strip .ls-go {
+  flex: none;
+  margin-left: auto;
+  color: var(--ink-2);
+}
+
+#lines-sec-paid {
+  scroll-margin-top: 12px;
+}
+
+/* A live game's quarter: amber is "now", as on Weekly's bugs. live-ink is
+   the text-on-white form of the amber. */
+.lines-table .ln-live {
+  font-weight: 700;
+  color: var(--live-ink);
+}
+
+.lines-key {
+  margin: 10px 2px 0;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+.lines-key b {
+  font: 700 12px var(--cond);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.lines-table td {
+  height: 48px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  vertical-align: middle;
+}
+
+.lines-table td.ln,
+.lines-table td.ln-game {
+  font: 600 16px var(--cond);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Kickoff-day divider inside a table: a page-tint strip in the column-head
+   voice, so the day reads as structure, not as another game. */
+.lines-table tr.ln-day th {
+  height: 28px;
+  background: var(--page);
+  color: var(--ink-2);
+  font: 700 12px var(--cond);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.lines-table .ln-match {
+  display: block;
+  font-weight: 700;
+}
+
+.lines-table .ln-sub {
+  display: block;
+  margin-top: 2px;
+  font: 500 12px var(--cond);
+  color: var(--ink-3);
+}
+
+.lines-table .ln-team {
+  color: var(--ink-2);
+}
+
+.lines-table .ln-none {
+  font-weight: 500;
+  color: var(--ink-3);
+}
+
+/* The value side as you'd pick it. Best: ink outline, bold. Smaller
+   edges: hairline outline. Other games' half points: plain text. The
+   transparent border keeps all three the same size. */
+.lines-table .edge {
+  display: inline-block;
+  padding: 0 7px;
+  line-height: 24px;
+  border: 1.5px solid transparent;
+  border-radius: 13px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.lines-table .edge.best {
+  border-color: var(--ink);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* ink-3, not the hairline: the hairline nearly vanished (in dark most of
+   all). Still a clear step below Best value's bold ink outline. */
+.lines-table .edge.small {
+  border-color: var(--ink-3);
+  color: var(--ink);
+}
+
+.lines-table .ln-value .ln-sub {
+  margin-top: 1px;
+}
+
+.ln-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 4px;
+}
+
+.ln-tag {
+  padding: 0 4px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font: 600 11px/16px var(--cond);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* Did value pay? */
+.lines-table .res {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--ink-2);
+}
+
+.lines-table .res.good {
+  color: var(--good);
+}
+
+.lines-table .res.bad {
+  color: var(--bad);
+}
+
+.lines-table .res.push {
+  color: var(--ink-3);
+}
+
+/* Fixed columns once there's room, so the stacked tables line up with each
+   other. Phones keep auto layout, sized to fit 375-390px. */
+@media (min-width: 600px) {
+  .lines-table {
+    table-layout: fixed;
+  }
+
+  .lines-table th:nth-child(1) { width: 26%; }
+  .lines-table th:nth-child(2) { width: 18%; }
+  .lines-table th:nth-child(3) { width: 15%; }
+  .lines-table th:nth-child(4) { width: 27%; }
+  .lines-table th:nth-child(5) { width: 14%; }
+
+  .paid-table th:nth-child(1) { width: 26%; }
+  .paid-table th:nth-child(2) { width: 33%; }
+  .paid-table th:nth-child(3) { width: 41%; }
+}
+
+/* Phones: shared fixed columns (O/U is hidden), so stacked Best / Smaller /
+   Other tables line up instead of each sizing its own. Not below 360px,
+   where the widest real cells need auto layout to fit. */
+@media (min-width: 360px) and (max-width: 599px) {
+  .lines-table:not(.paid-table) {
+    table-layout: fixed;
+  }
+
+  .lines-table:not(.paid-table) th:nth-child(1) { width: 31%; }
+  .lines-table:not(.paid-table) th:nth-child(2) { width: 26%; }
+  .lines-table:not(.paid-table) th:nth-child(3) { width: 14%; }
+  .lines-table:not(.paid-table) th:nth-child(4) { width: 29%; }
+}
+
+/* Phones drop O/U (DK-only and no use for picks against the spread) and the
+   opening numbers (ESPN's are often weeks-old lookahead lines), which also
+   leaves room for the Value cell to state the bet. */
+@media (max-width: 599px) {
+  .lines-table .col-ou,
+  .lines-table .ln-open-row,
+  #lines-note {
+    display: none;
+  }
+}
+
+/* Phones: tighter gaps between the middle cells. The first cell keeps
+   .board-table's 10px edge; the Value cell is the last VISIBLE one once O/U
+   hides, so it takes that 10px edge itself (it was 4px, lopsided against
+   the left). */
+@media (max-width: 420px) {
+  .lines-table th,
+  .lines-table td {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  .lines-table:not(.paid-table) th:nth-child(4),
+  .lines-table:not(.paid-table) td:nth-child(4) {
+    padding-right: 10px;
+  }
+}
+
+/* 375px phones (mini/SE): a size down so the table still fits. */
+@media (max-width: 380px) {
+  .lines-table td.ln,
+  .lines-table td.ln-game {
+    font-size: 15px;
+  }
+}
+
+/* 320px phones (first-gen SE): one more step, tighter gaps and pills. */
+@media (max-width: 340px) {
+  .lines-table td.ln,
+  .lines-table td.ln-game {
+    font-size: 14px;
+  }
+
+  .lines-table th,
+  .lines-table td {
+    padding-left: 3px;
+    padding-right: 3px;
+  }
+
+  .lines-table th:first-child,
+  .lines-table td:first-child {
+    padding-left: 8px;
+  }
+
+  .lines-table:not(.paid-table) th:nth-child(4),
+  .lines-table:not(.paid-table) td:nth-child(4),
+  .paid-table th:last-child,
+  .paid-table td:last-child {
+    padding-right: 8px;
+  }
+
+  .lines-table .edge {
+    padding: 0 4px;
+  }
+}
+
+.lines-error {
+  margin: 10px 0 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--live-bg);
+  color: var(--live-ink);
+  font-size: 14px;
+}
+
+#lines-note {
+  margin-top: 14px;
 }
 
 @media (prefers-reduced-motion: no-preference) {

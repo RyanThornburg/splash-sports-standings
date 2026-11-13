@@ -16,6 +16,14 @@ describe("fetch routing", () => {
     expect(body.splashUrl).toContain("contests.app.splashsports.com");
   });
 
+  it("returns an empty /api/spreads payload before the first lines refresh", async () => {
+    const response = await SELF.fetch("https://example.com/api/spreads");
+    const body = await response.json<{ lastUpdated: string | null; slates: unknown[] }>();
+
+    expect(response.status).toBe(200);
+    expect(body).toEqual({ lastUpdated: null, marketError: null, slates: [] });
+  });
+
   it("defaults /api/status to ok when no refresh has run yet", async () => {
     const response = await SELF.fetch("https://example.com/api/status");
     const body = await response.json<{ ok: boolean }>();

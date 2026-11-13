@@ -8,14 +8,27 @@ import {
   fetchGameCatalog,
   fetchSlateWeeks,
   fetchSlates,
+  spreadSlates,
   type PoolPickCount,
   type SlateGame,
+  type Slate,
   type WeeklyEntryResult,
 } from "./picks";
+import {
+  attachMarketLines,
+  espnDateKeys,
+  fetchEspnGames,
+  type GameWithMarket,
+  type MarketLine,
+} from "./odds";
 
 const STANDINGS_KV_KEY = "standings";
 const WEEKLY_CACHE_KV_KEY = "weekly_cache";
 const STATUS_KV_KEY = "status";
+const SPREADS_KV_KEY = "spreads";
+// Lines don't move minute to minute, and every refresh is a handful of ESPN
+// calls plus one Splash call, so this runs on a slower clock than the cron.
+const SPREADS_REFRESH_MS = 5 * 60 * 1000;
 
 interface RefreshStatus {
   ok: boolean;
@@ -61,11 +74,11 @@ async function refreshWeeklyCache(
   env: Env,
   idToken: string,
   seasonEntries: StandingsEntry[],
+  slates: Slate[],
 ): Promise<WeeklyCache> {
   const existing = await env.SPLASH_STANDINGS_KV.get<WeeklyCache>(WEEKLY_CACHE_KV_KEY, "json");
   const existingById = new Map(existing?.slates.map((s) => [s.id, s]) ?? []);
 
-  const slates = await fetchSlates(idToken, CONTEST_ID);
   const updatedSlates: CachedSlate[] = [];
 
   for (const slate of slates) {
@@ -139,11 +152,75 @@ function applyPendingCounts(entries: StandingsEntry[], weekly: WeeklyCache): voi
   }
 }
 
+interface SpreadsSlate {
+  id: string;
+  name: string;
+  isCurrentSlate: boolean;
+  pickLockDate: string;
+  games: GameWithMarket[];
+}
+
+interface SpreadsCache {
+  lastUpdated: string;
+  marketError: string | null;
+  slates: SpreadsSlate[];
+}
+
+async function refreshSpreadsCache(
+  env: Env,
+  idToken: string,
+  slates: Slate[],
+  weekly: WeeklyCache,
+  now = new Date(),
+): Promise<void> {
+  const existing = await env.SPLASH_STANDINGS_KV.get<SpreadsCache>(SPREADS_KV_KEY, "json");
+  if (existing && now.getTime() - Date.parse(existing.lastUpdated) < SPREADS_REFRESH_MS) return;
+
+  const previous = new Map<string, MarketLine | null>();
+  for (const slate of existing?.slates ?? []) {
+    for (const game of slate.games) previous.set(game.gameId, game.market);
+  }
+
+  const targets = [];
+  for (const slate of spreadSlates(slates)) {
+    // The weekly refresh already fetched the current week's catalog this tick.
+    const games =
+      weekly.slates.find((s) => s.id === slate.id)?.games ??
+      (await fetchGameCatalog(idToken, CONTEST_ID, slate.id));
+    targets.push({ slate, games });
+  }
+
+  let events: Awaited<ReturnType<typeof fetchEspnGames>> = [];
+  let marketError: string | null = null;
+  try {
+    const startsAts = targets.flatMap((t) => t.games.map((g) => g.startsAt));
+    events = await fetchEspnGames(espnDateKeys(startsAts, now));
+  } catch (err) {
+    // Keep serving the last lines we had; the tab says they're stale.
+    console.error("ESPN odds refresh failed", err);
+    marketError = String(err);
+  }
+
+  const cache: SpreadsCache = {
+    lastUpdated: now.toISOString(),
+    marketError,
+    slates: targets.map(({ slate, games }) => ({
+      id: slate.id,
+      name: slate.name,
+      isCurrentSlate: slate.isCurrentSlate,
+      pickLockDate: slate.pickLockDate,
+      games: attachMarketLines(games, events, previous),
+    })),
+  };
+  await env.SPLASH_STANDINGS_KV.put(SPREADS_KV_KEY, JSON.stringify(cache));
+}
+
 async function refreshAll(env: Env): Promise<void> {
   const idToken = await getValidIdToken(env);
 
   const seasonEntries = await fetchSeasonStandings(idToken);
-  const weekly = await refreshWeeklyCache(env, idToken, seasonEntries);
+  const slates = await fetchSlates(idToken, CONTEST_ID);
+  const weekly = await refreshWeeklyCache(env, idToken, seasonEntries, slates);
   applyPendingCounts(seasonEntries, weekly);
 
   await env.SPLASH_STANDINGS_KV.put(
@@ -158,6 +235,14 @@ async function refreshAll(env: Env): Promise<void> {
 
   const aggregates = computeAggregatesCache(weekly, FILTERED_HANDLES);
   await env.SPLASH_STANDINGS_KV.put("aggregates", JSON.stringify(aggregates));
+
+  // Lines are a side feature: a Splash or ESPN hiccup here shouldn't flag the
+  // standings refresh as failed.
+  try {
+    await refreshSpreadsCache(env, idToken, slates, weekly);
+  } catch (err) {
+    console.error("Spreads refresh failed", err);
+  }
 }
 
 async function markStatus(env: Env, ok: boolean, error: string | null): Promise<void> {
@@ -230,6 +315,11 @@ export default {
     if (url.pathname === "/api/aggregates") {
       const cached = await env.SPLASH_STANDINGS_KV.get<AggregatesCache>("aggregates", "json");
       return Response.json(cached ?? { lastUpdated: null, byHandle: {} });
+    }
+
+    if (url.pathname === "/api/spreads") {
+      const cached = await env.SPLASH_STANDINGS_KV.get<SpreadsCache>(SPREADS_KV_KEY, "json");
+      return Response.json(cached ?? { lastUpdated: null, marketError: null, slates: [] });
     }
 
     if (url.pathname === "/api/status") {

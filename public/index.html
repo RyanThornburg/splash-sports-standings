@@ -7,6 +7,9 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="preload" href="/fonts/barlow-semi-condensed-700.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- Lines' tables are mostly 600: without it preloaded they first lay
+         out in a wider fallback face and briefly overflow on a phone. -->
+    <link rel="preload" href="/fonts/barlow-semi-condensed-600.woff2" as="font" type="font/woff2" crossorigin />
     <script>
       // Apply a saved theme choice before first paint (no flash). With
       // nothing saved, style.css follows the device's colour scheme.
@@ -31,8 +34,9 @@
       <nav class="tabs" role="tablist" aria-label="Views">
         <button class="tab-button active" role="tab" aria-selected="true" aria-controls="tab-overall" data-tab="overall">Overall</button>
         <button class="tab-button" role="tab" aria-selected="false" aria-controls="tab-weekly" data-tab="weekly">Weekly</button>
-        <button class="tab-button" role="tab" aria-selected="false" aria-controls="tab-aggregates" data-tab="aggregates">Team Picks</button>
+        <button class="tab-button" role="tab" aria-selected="false" aria-controls="tab-aggregates" data-tab="aggregates"><span class="tab-long">Team Picks</span><span class="tab-short">Teams</span></button>
         <button class="tab-button" role="tab" aria-selected="false" aria-controls="tab-trends" data-tab="trends">Trends</button>
+        <button class="tab-button" role="tab" aria-selected="false" aria-controls="tab-lines" data-tab="lines">Lines</button>
       </nav>
 
       <section id="tab-overall" class="tab-panel" role="tabpanel" hidden>
@@ -149,6 +153,47 @@
         <h2 class="section-title">Pool: most picked this season</h2>
         <div id="trends-pool-season-content"></div>
         <p id="trends-pool-season-empty" class="empty" hidden>No pool pick data yet.</p>
+      </section>
+
+      <section id="tab-lines" class="tab-panel lines" role="tabpanel" hidden>
+        <div class="weeknav">
+          <button type="button" id="lines-prev" aria-label="Previous week">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+          </button>
+          <div class="week-title">
+            <strong id="lines-label">Loading…</strong>
+            <span id="lines-state" class="week-state"></span>
+          </div>
+          <button type="button" id="lines-next" aria-label="Next week">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
+          </button>
+        </div>
+        <a id="lines-strip" class="lines-strip" href="#lines-sec-paid" hidden></a>
+        <p id="lines-key" class="lines-key" hidden></p>
+        <p id="lines-error" class="lines-error" role="status" hidden></p>
+
+        <div id="lines-sec-best" hidden>
+          <h2 class="section-title">Best value <span class="count" id="lines-count-best"></span></h2>
+          <p class="ln-desc" id="lines-desc-best"></p>
+          <div class="board-scroll" id="lines-best"></div>
+        </div>
+        <div id="lines-sec-small" hidden>
+          <h2 class="section-title">Smaller edges <span class="count" id="lines-count-small"></span></h2>
+          <p class="ln-desc" id="lines-desc-small"></p>
+          <div class="board-scroll" id="lines-small"></div>
+        </div>
+        <div id="lines-sec-other" hidden>
+          <h2 class="section-title"><span id="lines-other-title">Other games</span> <span class="count" id="lines-count-other"></span></h2>
+          <div class="board-scroll" id="lines-other"></div>
+          <button type="button" id="lines-other-toggle" class="more-button" aria-controls="lines-other"></button>
+        </div>
+        <div id="lines-sec-paid" hidden>
+          <h2 class="section-title">Did value pay? <span class="count" id="lines-count-paid"></span></h2>
+          <div class="board-scroll" id="lines-paid"></div>
+          <p id="lines-paid-note" class="table-note"></p>
+        </div>
+        <p id="lines-note" class="table-note" hidden></p>
+        <p id="lines-empty" class="empty" hidden>Splash hasn't posted any lines for this week yet.</p>
       </section>
     </main>
     <script type="module" src="/app.js"></script>

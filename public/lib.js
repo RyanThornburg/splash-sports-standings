@@ -372,3 +372,231 @@ export function weekInProgress(users, gamesById) {
   const state = weekState(users, gamesById);
   return state?.kind === "live" || state?.kind === "between";
 }
+
+// ---- Lines (Splash's line vs the market) ----
+// Both spreads are from Splash's home team's side (negative = home
+// favoured); the Worker already flipped ESPN's number for neutral-site games
+// it lists the other way round.
+
+// A Splash line this far off the market makes the "Line value" section.
+// Same 1-point bar as the NFL pool's CBS-vs-Vegas edge.
+export const VALUE_EDGE_PTS = 1;
+
+const MINUS = "−";
+
+// A spread as the Lines tab writes it: "−3.5", "+1.5", "PK". Rows read
+// every column from the home team's side, the way the user reads a line
+// ("COLO +10.5"); the Value cell uses the value side's own line.
+export function lineText(spread) {
+  if (spread == null) return null;
+  if (spread === 0) return "PK";
+  return spread > 0 ? `+${spread}` : `${MINUS}${Math.abs(spread)}`;
+}
+
+// Which side Splash's line favours compared with the market, and by how
+// many points. market − splash > 0 means the market makes home a smaller
+// favorite (or bigger dog) than Splash does, so Splash is handing the AWAY
+// team extra points; < 0, the home team. Mirrors cbs-pickem-web's
+// getValueSide (market close − CBS spread).
+export function lineEdge(game) {
+  const splash = game.home?.spread;
+  const market = game.market?.spread;
+  if (splash == null || market == null) return null;
+  const delta = market - splash;
+  if (delta === 0) return { team: null, points: 0 };
+  return { team: delta > 0 ? game.away : game.home, points: Math.abs(delta) };
+}
+
+// Display names for the market's book: { full, short } ("DraftKings", "DK").
+// ESPN has sent both "DraftKings" and "Draft Kings", and lines cached before
+// the Worker normalized it keep the old spelling, so match loosely here too.
+// Keep in sync with BOOK_NAMES in src/odds.ts. Null when there's no name.
+const BOOKS = {
+  draftkings: ["DraftKings", "DK"],
+  fanduel: ["FanDuel", "FD"],
+  espnbet: ["ESPN BET", "ESPN"],
+  betmgm: ["BetMGM", "MGM"],
+  caesars: ["Caesars", "CZR"],
+};
+export function bookNames(provider) {
+  const name = (provider ?? "").trim();
+  if (!name || name === "Market") return null;
+  const known = BOOKS[name.toLowerCase().replace(/[^a-z0-9]/g, "")];
+  return known ? { full: known[0], short: known[1] } : { full: name, short: name };
+}
+
+// The book for a week's Lines: the first named provider in that week, or
+// in any week (early in a week ESPN may have posted nothing yet).
+export function linesBook(slates, slateId) {
+  const first = (games) => games.map((g) => bookNames(g.market?.provider)).find(Boolean) ?? null;
+  const own = slates.find((s) => s.id === slateId);
+  return first(own?.games ?? []) ?? first(slates.flatMap((s) => s.games ?? []));
+}
+
+// The most common winning margins in college football. A line edge that
+// moves you across one of these is worth more than its point count.
+export const KEY_NUMBERS = [3, 7, 10];
+
+// The side Splash is giving extra points to, as you'd pick it: that team's
+// Splash line and market line (from its own side), the gap, and why it's
+// worth a look. Null when the books agree or there's no market line.
+//   flip        Splash and the market disagree on who's favoured
+//   keyNumbers  key margins (either team winning by 3, 7, 10) that get a
+//               better result at Splash's line than the market's: a loss
+//               becomes a push or a cover, or a push becomes a cover
+export function valuePick(game) {
+  const edge = lineEdge(game);
+  if (!edge || !edge.team) return null;
+  const isHome = edge.team === game.home;
+  const fromSide = (homeSpread) => (isHome ? homeSpread : -homeSpread) + 0; // + 0 drops -0
+  const splash = fromSide(game.home.spread);
+  const market = fromSide(game.market.spread);
+  const s = game.home.spread;
+  const m = game.market.spread;
+  const keyNumbers = KEY_NUMBERS.filter((k) =>
+    [k, -k].some((margin) => Math.sign(margin + splash) > Math.sign(margin + market)),
+  );
+  return {
+    team: edge.team,
+    splash,
+    market,
+    points: edge.points,
+    flip: (s < 0 && m > 0) || (s > 0 && m < 0),
+    keyNumbers,
+  };
+}
+
+// "best":  2+ points, a flipped favorite, or a full point or more that
+//          crosses a key number
+// "small": VALUE_EDGE_PTS (1) to 1.5 points, or a half point that crosses
+//          a key number (common around 3: −2.5 vs −3). Promoting those to
+//          "best" put 12 games there in a real week, which is no shortlist.
+// null:    no edge, or a half point that crosses nothing
+export function valueTier(pick) {
+  if (!pick) return null;
+  const crosses = pick.keyNumbers.length > 0;
+  if (pick.points >= 2 || pick.flip || (crosses && pick.points >= VALUE_EDGE_PTS)) return "best";
+  if (pick.points >= VALUE_EDGE_PTS || crosses) return "small";
+  return null;
+}
+
+// Splits a week's games for the Lines tab:
+//   best   still to kick off, valueTier "best", by kickoff
+//   small  still to kick off, valueTier "small", by kickoff
+//   other  still to kick off, everything else, by kickoff
+// Kickoff order everywhere, not biggest gap first: picks are entered on
+// Splash's pick sheet, which runs in kickoff order, and sorting by points
+// sank the half-point-across-3 edges to the bottom and mixed Friday's
+// games in with Saturday's. The tier already says how good an edge is.
+//   paid   kicked off and had a value tier: did the value side cover?
+// Uses the clock rather than game.status, since the lines cache only
+// refreshes every few minutes. Kicked-off games with no edge are dropped:
+// they can't be picked and there's nothing to grade.
+export function linesSections(games, nowMs = Date.now()) {
+  const kickoff = (g) => Date.parse(g.startsAt);
+  const byKickoff = (a, b) => kickoff(a) - kickoff(b);
+  const rows = games.map((game) => {
+    const pick = valuePick(game);
+    return { game, pick, tier: valueTier(pick) };
+  });
+  const byRowKickoff = (a, b) => byKickoff(a.game, b.game);
+  const upcoming = rows.filter((r) => kickoff(r.game) > nowMs).sort(byRowKickoff);
+  return {
+    best: upcoming.filter((r) => r.tier === "best"),
+    small: upcoming.filter((r) => r.tier === "small"),
+    other: upcoming.filter((r) => r.tier === null),
+    paid: rows.filter((r) => kickoff(r.game) <= nowMs && r.tier !== null).sort((a, b) => byKickoff(a.game, b.game)),
+  };
+}
+
+// Splits kickoff-ordered rows into runs by local calendar day, for the day
+// dividers in the Lines tables. Each group's label leads with "Today" or
+// "Tomorrow" when it applies ("Today · Fri Nov 13"), so tonight's games,
+// the first to lock, stand apart from Saturday's.
+export function kickoffDays(rows, nowMs = Date.now()) {
+  const dayStart = (ms) => {
+    const d = new Date(ms);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  };
+  const today = dayStart(nowMs);
+  const groups = [];
+  for (const row of rows) {
+    const start = dayStart(Date.parse(row.game.startsAt));
+    let group = groups[groups.length - 1];
+    if (!group || group.start !== start) {
+      // Round, not floor: a DST change makes one day 23 or 25 hours.
+      const diff = Math.round((start - today) / 86_400_000);
+      const date = new Date(start).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+      const relative = diff === 0 ? "Today" : diff === 1 ? "Tomorrow" : null;
+      group = { start, label: relative ? `${relative} · ${date}` : date, rows: [] };
+      groups.push(group);
+    }
+    group.rows.push(row);
+  }
+  return groups;
+}
+
+// How a kicked-off value pick is doing, at Splash's line and at the
+// market's: { tone, live, label } like pickStatus, plus whether the extra
+// points are what made it cover (won or pushed at Splash where the market
+// line would have done worse).
+const RESULT_RANK = { won: 2, "live-winning": 2, push: 1, "live-tied": 1, lost: 0, "live-losing": 0, pending: -1 };
+export function valueResult(row) {
+  const { game, pick } = row;
+  const atSplash = coverStatus(pick.team.alias, pick.splash, game);
+  const atMarket = coverStatus(pick.team.alias, pick.market, game);
+  const status = {
+    won: { tone: "good", live: false, label: "Covered" },
+    lost: { tone: "bad", live: false, label: "Didn't cover" },
+    push: { tone: "push", live: false, label: "Push" },
+    "live-winning": { tone: "good", live: true, label: "Covering" },
+    "live-losing": { tone: "bad", live: true, label: "Not covering" },
+    "live-tied": { tone: "push", live: true, label: "Tied" },
+    // Kicked off by the clock, but the cache has no score yet.
+    pending: { tone: "pending", live: false, label: "No score yet" },
+  }[atSplash];
+  const final = atSplash === "won" || atSplash === "lost" || atSplash === "push";
+  // atMarket says how the market's line would have done, for "DK −9.5
+  // would've lost" under a result the extra points decided.
+  return { ...status, final, atMarket, extraPointsMattered: final && RESULT_RANK[atSplash] > RESULT_RANK[atMarket] };
+}
+
+// "Did value pay?" rows split by where the game is: live first (what's
+// happening now), then final, then kicked off with no score in the cache
+// yet. Each keeps kickoff order.
+export function paidGroups(paidRows) {
+  const groups = { live: [], final: [], waiting: [] };
+  for (const row of paidRows) {
+    const result = valueResult(row);
+    (result.final ? groups.final : result.live ? groups.live : groups.waiting).push(row);
+  }
+  return groups;
+}
+
+// Tally for "Did value pay?": finished value picks' W-L-T, and how many of
+// them the extra points decided.
+export function valueTally(paidRows) {
+  const results = paidRows.map(valueResult).filter((r) => r.final);
+  return {
+    wins: results.filter((r) => r.tone === "good").length,
+    losses: results.filter((r) => r.tone === "bad").length,
+    ties: results.filter((r) => r.tone === "push").length,
+    decided: results.filter((r) => r.extraPointsMattered).length,
+  };
+}
+
+// The Lines week nav's state line: games still to kick off and the next
+// kickoff, or null once everything has started.
+export function linesWeekState(games, nowMs = Date.now()) {
+  const upcoming = games.map((g) => Date.parse(g.startsAt)).filter((t) => t > nowMs);
+  if (upcoming.length === 0) return null;
+  return { toGo: upcoming.length, next: new Date(Math.min(...upcoming)).toISOString() };
+}
+
+// Lines opens on the first week with a game still to kick off (the one you
+// can still pick), else the latest week.
+export function defaultLinesSlateId(slates, nowMs = Date.now()) {
+  if (!slates || slates.length === 0) return null;
+  const open = slates.find((s) => (s.games ?? []).some((g) => Date.parse(g.startsAt) > nowMs));
+  return (open ?? slates[slates.length - 1]).id;
+}
