@@ -12,6 +12,7 @@ import {
   formatSpread,
   gameHeaderLines,
   isLiveGame,
+  kickoffDayWord,
   kickoffDays,
   lineEdge,
   lineText,
@@ -682,6 +683,18 @@ describe("Lines helpers", () => {
       expect(ids(s.small)).toEqual(["key-half", "small"]);
       expect(ids(s.other)).toEqual(["half", "no-market", "late-even"]);
       expect(ids(s.paid)).toEqual(["started"]);
+    });
+  });
+
+  describe("kickoffDayWord", () => {
+    // Local-time dates, so the test holds in any runtime timezone.
+    const local = (day: number, hour: number) => new Date(2026, 10, day, hour, 0).toISOString();
+    const fri = Date.parse(local(13, 10));
+    it("says tonight / today / tomorrow, else the weekday", () => {
+      expect(kickoffDayWord(local(13, 19), fri)).toBe("tonight");
+      expect(kickoffDayWord(local(13, 12), fri)).toBe("today");
+      expect(kickoffDayWord(local(14, 12), fri)).toBe("tomorrow");
+      expect(kickoffDayWord(local(17, 12), fri)).toMatch(/^Tue/);
     });
   });
 

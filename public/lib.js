@@ -585,6 +585,21 @@ export function valueTally(paidRows) {
   };
 }
 
+// "tonight" / "today" / "tomorrow", else the short weekday ("Sat"), for a
+// kickoff relative to now. "next Fri 7:00 PM" read as a week away when it
+// was shown on that Friday. Tonight is 5 PM on.
+export function kickoffDayWord(iso, nowMs = Date.now()) {
+  const d = new Date(iso);
+  const dayStart = (t) => {
+    const x = new Date(t);
+    return new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  };
+  const diff = Math.round((dayStart(d.getTime()) - dayStart(nowMs)) / 86_400_000);
+  if (diff === 0) return d.getHours() >= 17 ? "tonight" : "today";
+  if (diff === 1) return "tomorrow";
+  return d.toLocaleDateString(undefined, { weekday: "short" });
+}
+
 // The Lines week nav's state line: games still to kick off and the next
 // kickoff, or null once everything has started.
 export function linesWeekState(games, nowMs = Date.now()) {

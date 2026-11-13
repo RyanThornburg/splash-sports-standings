@@ -12,6 +12,7 @@ import {
   lineText,
   linesSections,
   linesWeekState,
+  kickoffDayWord,
   paidGroups,
   kickoffDays,
   pickStatus,
@@ -776,7 +777,6 @@ let linesOtherOpenFor = null;
 // When no week has a named book yet (nothing posted by ESPN at all).
 const NO_BOOK = { full: "the market", short: "Market" };
 
-const ptsText = (n) => `${n} ${n === 1 ? "pt" : "pts"}`;
 const noValue = `<span class="ln-none">–</span>`;
 
 // Opening numbers only show from 600px up (.ln-open-row), labelled. ESPN's
@@ -805,11 +805,13 @@ function totalCell(game) {
 function valueCell(pick, tier, book, { graded = false } = {}) {
   if (!pick) return `<td class="ln">${noValue}</td>`;
   const tags = [];
-  if (pick.flip) tags.push(`${book.short} favorite`);
+  if (pick.flip) tags.push(`Favorite at ${book.short}`);
   for (const k of pick.keyNumbers) tags.push(`Crosses ${k}`);
-  const better = `${graded ? "was " : ""}${ptsText(pick.points)} better`;
+  // The edge size ranks one row against another, so it gets its own role:
+  // the number in the numeral voice, the words a step quieter.
+  const unit = pick.points === 1 ? "pt" : "pts";
   return `<td class="ln ln-value"><span class="edge${tier ? ` ${tier}` : ""}">${esc(pick.team.alias)} ${esc(lineText(pick.splash))}</span>
-    <span class="ln-sub">${esc(better)}<span class="sr-only"> than ${esc(book.full)}'s ${esc(lineText(pick.market))}</span></span>
+    <span class="ln-edge">${graded ? "was " : ""}<b>${esc(pick.points)}</b> ${unit} better<span class="sr-only"> than ${esc(possessive(book.full))} ${esc(lineText(pick.market))}</span></span>
     ${tags.length ? `<span class="ln-tags">${tags.map((t) => `<span class="ln-tag">${esc(t)}</span>`).join("")}</span>` : ""}</td>`;
 }
 
@@ -838,9 +840,13 @@ function linesTable(rows, book) {
 // Escaped HTML for the game cell's second line. A live game's quarter is
 // amber, as on Weekly's score bugs (amber is "now").
 function paidScore(game) {
-  const score = esc(`${game.away.score ?? 0}–${game.home.score ?? 0}`);
+  const score = `<span class="ln-score">${esc(`${game.away.score ?? 0}–${game.home.score ?? 0}`)}</span>`;
   if (FINISHED_STATUSES.has(game.status)) return `Final ${score}`;
-  if (game.state) return `<span class="ln-live">${esc(quarterLabel(game.state.quarter))}</span> ${score}`;
+  // Quarter and clock, as Weekly's bugs show them: "3rd 8:12 · 10–17".
+  if (game.state) {
+    const clock = game.state.clock ? ` ${esc(game.state.clock)}` : "";
+    return `<span class="ln-live">${esc(quarterLabel(game.state.quarter))}${clock}</span> · ${score}`;
+  }
   if (game.status === "in_progress") return `<span class="ln-live">Live</span> ${score}`;
   return esc(`Kicked off ${kickoff(game).time}`);
 }
@@ -889,19 +895,27 @@ function renderLinesStrip(paidRows, tally) {
   if (!graded && !live.length) parts.push(`${waiting.length} kicked off`);
   const joined = parts.map((p, i) => `<span class="ls-part${p.includes("ls-wide") ? " ls-wide" : ""}">${i ? '<span class="ls-sep">·</span>' : ""}${p}</span>`).join("");
   strip.innerHTML =
-    `<span class="ls-label">Value picks</span><span class="ls-parts">${joined}</span>` +
-    `<svg class="ls-go" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>`;
+    `<span class="ls-label">Value sides</span><span class="ls-parts">${joined}</span>` +
+    // A jump, not an accordion: say where it goes ("Results ↓") rather than
+    // a bare chevron that promised to expand in place.
+    `<span class="ls-go">Results<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6" /></svg></span>`;
 }
 
 function linesSlates() {
   return linesData?.slates ?? [];
 }
 
-function linesWeekStateText(state, games) {
+// "59 games left · next kickoff tonight 7:00 PM", as escaped HTML: each
+// phrase is unbreakable, so a phone wraps between them, never "7:00 / PM".
+function linesWeekStateHtml(state, games) {
   if (!state) return games.length ? "All kicked off" : "";
-  const k = kickoff({ startsAt: state.next });
-  return `${state.toGo} to go · next ${k.day} ${k.time}`;
+  const left = `${state.toGo} ${state.toGo === 1 ? "game" : "games"} left`;
+  const next = `next kickoff ${kickoffDayWord(state.next)} ${kickoff({ startsAt: state.next }).time}`;
+  return `<span class="ws-part">${esc(left)} ·</span> <span class="ws-part">${esc(next)}</span>`;
 }
+
+// "DraftKings'" not "DraftKings's".
+const possessive = (name) => (name.endsWith("s") ? `${name}'` : `${name}'s`);
 
 function renderLines() {
   const data = linesData ?? {};
@@ -916,7 +930,7 @@ function renderLines() {
   // Before Splash posts any lines, the state line still gives the schedule
   // (the body says the lines aren't posted).
   const scheduled = games.length ? games : allGames;
-  $("lines-state").textContent = linesWeekStateText(linesWeekState(scheduled), scheduled);
+  $("lines-state").innerHTML = linesWeekStateHtml(linesWeekState(scheduled), scheduled);
   $("lines-prev").disabled = index <= 0;
   $("lines-next").disabled = index < 0 || index >= list.length - 1;
 
@@ -937,18 +951,25 @@ function renderLines() {
   // sentence only when it says something: no "X is X", no "hasn't posted"
   // while ESPN itself is failing (that's the banner's job).
   const checked = relativeTime(data.lastUpdated);
-  const when = checked ? `, checked ${esc(checked)}` : "";
+  // No "checked N min ago" while the ESPN error banner says the check failed.
+  const when = checked && !data.marketError ? `, checked ${esc(checked)}` : "";
   const upcoming = [...sections.best, ...sections.small, ...sections.other];
   const unposted = upcoming.filter((r) => r.game.market?.spread == null).length;
   const hasValue = sections.best.length + sections.small.length > 0;
   const key = [`Spreads are the home team's line.`];
   if (!named) key.push(`ESPN has no market lines for this week yet.`);
   else if (book.short !== book.full) key.push(`<b>${esc(book.short)}</b> is ${esc(book.full)}${when}.`);
-  else key.push(`Market lines are ${esc(book.full)}'s${when}.`);
+  else key.push(`Market lines are ${esc(possessive(book.full))}${when}.`);
   if (games.length < allGames.length) key.push(`Splash has posted ${games.length} of ${allGames.length} games so far.`);
   if (named && !data.marketError && unposted > 0) key.push(`${esc(book.short)} hasn't posted ${unposted} yet.`);
   if (named && !hasValue && unposted < upcoming.length) key.push(`Nothing is a point or more better than ${esc(book.short)} yet.`);
   $("lines-key").innerHTML = key.join(" ");
+
+  // Pick on Splash: in every week state (you can always go pick), only
+  // once the data (and so the URL) has loaded.
+  const splash = $("lines-splash");
+  splash.hidden = !data.splashUrl;
+  if (data.splashUrl) splash.href = data.splashUrl;
   $("lines-key").hidden = !hasLines;
 
   const fill = (name, rows, html) => {
@@ -970,6 +991,12 @@ function renderLines() {
   toggle.textContent = open ? "Hide other games" : `Show ${sections.other.length} other ${sections.other.length === 1 ? "game" : "games"}`;
 
   fill("paid", sections.paid, paidTable(sections.paid, book));
+  // With no value left to pick, "Did value pay?" is the more useful section,
+  // so it moves above the no-value Other games.
+  const paidSec = $("lines-sec-paid");
+  const otherSec = $("lines-sec-other");
+  if (!hasValue && sections.paid.length) otherSec.before(paidSec);
+  else otherSec.after(paidSec);
   const tally = valueTally(sections.paid);
   renderLinesStrip(sections.paid, tally);
   const graded = tally.wins + tally.losses + tally.ties;
@@ -985,7 +1012,8 @@ function renderLines() {
   // What each tier means, right under its heading where it's read, not in
   // a footnote 2,000px down.
   const keys = "3, 7 or 10, the most common winning margins";
-  $("lines-desc-best").textContent = `2+ points better than ${book.short}, ${book.short}'s favorite, or a point or more across ${keys}.`;
+  $("lines-desc-best").textContent =
+    `2+ points better than ${book.short}, a team ${book.short} favors getting points at Splash, or a point or more across ${keys}.`;
   $("lines-desc-small").textContent = `1 to 1.5 points better, or half a point across 3, 7 or 10.`;
   $("lines-note").innerHTML = `Small grey "open" numbers are where ${esc(book.short)} opened, often weeks earlier.`;
 }

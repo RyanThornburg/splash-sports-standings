@@ -163,6 +163,8 @@ interface SpreadsSlate {
 interface SpreadsCache {
   lastUpdated: string;
   marketError: string | null;
+  // Lines' "Pick on Splash" link; the same contest URL Overall links to.
+  splashUrl: string;
   slates: SpreadsSlate[];
 }
 
@@ -204,6 +206,7 @@ async function refreshSpreadsCache(
   const cache: SpreadsCache = {
     lastUpdated: now.toISOString(),
     marketError,
+    splashUrl: SPLASH_STANDINGS_URL,
     slates: targets.map(({ slate, games }) => ({
       id: slate.id,
       name: slate.name,
@@ -319,7 +322,13 @@ export default {
 
     if (url.pathname === "/api/spreads") {
       const cached = await env.SPLASH_STANDINGS_KV.get<SpreadsCache>(SPREADS_KV_KEY, "json");
-      return Response.json(cached ?? { lastUpdated: null, marketError: null, slates: [] });
+      // splashUrl is filled from config even for a blob cached before the
+      // field existed, so the link shows without waiting for a refresh.
+      return Response.json(
+        cached
+          ? { ...cached, splashUrl: SPLASH_STANDINGS_URL }
+          : { lastUpdated: null, marketError: null, splashUrl: SPLASH_STANDINGS_URL, slates: [] },
+      );
     }
 
     if (url.pathname === "/api/status") {

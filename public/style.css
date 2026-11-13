@@ -1524,8 +1524,14 @@ h1 {
 }
 
 .lines-strip .ls-go {
+  display: inline-flex;
   flex: none;
+  align-items: center;
+  gap: 3px;
   margin-left: auto;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--ink-2);
 }
 
@@ -1538,6 +1544,41 @@ h1 {
 .lines-table .ln-live {
   font-weight: 700;
   color: var(--live-ink);
+}
+
+/* Key line and "Pick on Splash" share a row; the link drops below the key
+   on a phone when both don't fit. */
+.week-state {
+  text-align: center;
+}
+
+.week-state .ws-part {
+  white-space: nowrap;
+}
+
+.lines-keyrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  column-gap: 12px;
+  row-gap: 8px;
+  margin-top: 10px;
+}
+
+.lines-keyrow .lines-key {
+  flex: 1 1 260px;
+  margin: 0 2px;
+}
+
+/* Overall's Splash link button, sized to sit beside the key: 40px target,
+   no top margin. */
+.lines-splash {
+  flex: none;
+  min-height: 40px;
+  margin-top: 0;
+  padding-block: 0;
+  white-space: nowrap;
 }
 
 .lines-key {
@@ -1624,8 +1665,21 @@ h1 {
   color: var(--ink);
 }
 
-.lines-table .ln-value .ln-sub {
-  margin-top: 1px;
+/* Edge size: what ranks one row against another, so not metadata grey.
+   The number takes the numeral voice (ink, 700, tabular); "pts better" sits
+   a step quieter. Kickoff times and "open" numbers stay .ln-sub. */
+.lines-table .ln-edge {
+  display: block;
+  margin-top: 2px;
+  font: 600 13px/1.15 var(--cond);
+  color: var(--ink-2);
+}
+
+.lines-table .ln-edge b {
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
 }
 
 .ln-tags {
@@ -1761,6 +1815,25 @@ h1 {
 
   .lines-table .edge {
     padding: 0 4px;
+  }
+
+  /* The graded table wraps between phrases at 320px ("3rd 8:12 ·" over
+     "10–17"), never inside the pill, the result or the quarter-clock. */
+  .paid-table td {
+    white-space: normal;
+  }
+
+  .paid-table .edge,
+  .paid-table .res,
+  .paid-table .ln-live,
+  .paid-table .ln-score {
+    white-space: nowrap;
+  }
+
+  /* "FAVORITE AT DK" is the widest thing in a 320px Value cell. */
+  .ln-tag {
+    font-size: 10px;
+    letter-spacing: 0.02em;
   }
 }
 

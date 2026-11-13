@@ -21,7 +21,8 @@ describe("fetch routing", () => {
     const body = await response.json<{ lastUpdated: string | null; slates: unknown[] }>();
 
     expect(response.status).toBe(200);
-    expect(body).toEqual({ lastUpdated: null, marketError: null, slates: [] });
+    expect(body).toMatchObject({ lastUpdated: null, marketError: null, slates: [] });
+    expect((body as { splashUrl?: string }).splashUrl).toContain("contests.app.splashsports.com");
   });
 
   it("defaults /api/status to ok when no refresh has run yet", async () => {
