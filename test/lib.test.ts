@@ -728,11 +728,27 @@ describe("Lines helpers", () => {
 
     it("grades the value side at Splash's line and notices when the extra points decided it", () => {
       // PITT -3 on Splash (DK -4), wins by 3: push on Splash, a loss at DK.
-      expect(valueResult(row(finalGame(24, 21)))).toMatchObject({ tone: "push", label: "Push", final: true, extraPointsMattered: true, atMarket: "lost" });
+      expect(valueResult(row(finalGame(24, 21)))).toMatchObject({ tone: "push", label: "Push", final: true, extraPointsMatter: true, atMarket: "lost" });
       // Loses outright: "Didn't cover", not the vaguer "Missed".
       expect(valueResult(row(finalGame(10, 21)))).toMatchObject({ tone: "bad", label: "Didn't cover" });
       // Wins by 9: covers either way.
-      expect(valueResult(row(finalGame(30, 21)))).toMatchObject({ tone: "good", label: "Covered", extraPointsMattered: false });
+      expect(valueResult(row(finalGame(30, 21)))).toMatchObject({ tone: "good", label: "Covered", extraPointsMatter: false });
+    });
+
+    it("only credits the extra points when they're the difference, live too", () => {
+      // FSU +3.5 on Splash vs +3 at DK, up 6-0: covering at either line, so
+      // the half point isn't what's doing it.
+      const fsu = {
+        ...game("g", -3.5, -3),
+        status: "in_progress",
+        home: { alias: "PITT", name: "Pittsburgh", spread: -3.5, score: 0 },
+        away: { alias: "FSU", name: "Florida State", spread: 3.5, score: 6 },
+      };
+      expect(valuePick(fsu)?.team.alias).toBe("FSU");
+      expect(valueResult(row(fsu))).toMatchObject({ label: "Covering", live: true, extraPointsMatter: false });
+      // Down 3: covering at +3.5 only; DK +3 would be tied.
+      const close = { ...fsu, home: { ...fsu.home, score: 3 }, away: { ...fsu.away, score: 0 } };
+      expect(valueResult(row(close))).toMatchObject({ label: "Covering", extraPointsMatter: true, atMarket: "live-tied" });
     });
 
     it("reads a live game as covering or not, never final", () => {

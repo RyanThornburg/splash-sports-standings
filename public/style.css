@@ -1428,7 +1428,7 @@ h1 {
 /* ---- Lines (Splash vs market) ----
    Quiet Tables Rule: white ruled panel, condensed numerals. The value pill
    is neutral ink, never green/red (those mean pick status) or blue
-   (popularity). Only "Did value pay?" uses green/red, because grading the
+   (popularity). Only Value sides uses green/red, because grading the
    value side IS a pick status, and always with the drawn icons. */
 
 /* A reading column, not a 1080px spreadsheet: five short columns spread
@@ -1439,7 +1439,7 @@ h1 {
 }
 
 /* The grey heading counts are ink-3 on the page tint, 4.2:1. Lines leans on
-   them ("Best value 5", "Did value pay? 13-5"), so step them up to ink-2. */
+   them ("Best value 5", "Value sides 13-5"), so step them up to ink-2. */
 .tab-panel.lines .section-title .count {
   color: var(--ink-2);
 }
@@ -1453,14 +1453,14 @@ h1 {
   color: var(--ink-2);
 }
 
-/* "DK −14 would've pushed" under a graded result wraps on a phone instead
+/* "At DK −14 it would've pushed" under a graded result wraps on a phone instead
    of pushing the table wide. */
 .paid-table td:nth-child(3) .ln-sub {
   white-space: normal;
 }
 
 /* Game-day strip: "Value picks 3-9 · extra points decided 2 · 1 live",
-   a white tray (like the week nav) that jumps to "Did value pay?". */
+   a white tray (like the week nav) that jumps to Value sides. */
 .lines-strip {
   display: flex;
   align-items: center;
@@ -1700,7 +1700,7 @@ h1 {
   white-space: nowrap;
 }
 
-/* Did value pay? */
+/* Value sides */
 .lines-table .res {
   display: inline-flex;
   align-items: center;
@@ -1733,9 +1733,9 @@ h1 {
   .lines-table th:nth-child(4) { width: 27%; }
   .lines-table th:nth-child(5) { width: 14%; }
 
-  .paid-table th:nth-child(1) { width: 26%; }
-  .paid-table th:nth-child(2) { width: 33%; }
-  .paid-table th:nth-child(3) { width: 41%; }
+  .paid-table th:nth-child(1) { width: 30%; }
+  .paid-table th:nth-child(2) { width: 22%; }
+  .paid-table th:nth-child(3) { width: 48%; }
 }
 
 /* Phones: shared fixed columns (O/U is hidden), so stacked Best / Smaller /

@@ -536,10 +536,13 @@ export function kickoffDays(rows, nowMs = Date.now()) {
   return groups;
 }
 
-// How a kicked-off value pick is doing, at Splash's line and at the
-// market's: { tone, live, label } like pickStatus, plus whether the extra
-// points are what made it cover (won or pushed at Splash where the market
-// line would have done worse).
+// How a kicked-off value pick is doing at Splash's line: { tone, live,
+// label } like pickStatus, plus how the market's line would be doing
+// (atMarket) and whether the extra points are the difference right now
+// (extraPointsMatter: covering or pushing at Splash where the market line
+// would do worse). Most of the time they aren't: FSU up 6-0 with half a
+// point of value covers at either line, so the section must only credit
+// the extra points when this flag says so.
 const RESULT_RANK = { won: 2, "live-winning": 2, push: 1, "live-tied": 1, lost: 0, "live-losing": 0, pending: -1 };
 export function valueResult(row) {
   const { game, pick } = row;
@@ -556,12 +559,10 @@ export function valueResult(row) {
     pending: { tone: "pending", live: false, label: "No score yet" },
   }[atSplash];
   const final = atSplash === "won" || atSplash === "lost" || atSplash === "push";
-  // atMarket says how the market's line would have done, for "DK −9.5
-  // would've lost" under a result the extra points decided.
-  return { ...status, final, atMarket, extraPointsMattered: final && RESULT_RANK[atSplash] > RESULT_RANK[atMarket] };
+  return { ...status, final, atMarket, extraPointsMatter: RESULT_RANK[atSplash] > RESULT_RANK[atMarket] };
 }
 
-// "Did value pay?" rows split by where the game is: live first (what's
+// Value sides rows split by where the game is: live first (what's
 // happening now), then final, then kicked off with no score in the cache
 // yet. Each keeps kickoff order.
 export function paidGroups(paidRows) {
@@ -573,15 +574,15 @@ export function paidGroups(paidRows) {
   return groups;
 }
 
-// Tally for "Did value pay?": finished value picks' W-L-T, and how many of
-// them the extra points decided.
+// Tally for the Value sides section: finished value picks' W-L-T, and how
+// many of those results the extra points changed.
 export function valueTally(paidRows) {
   const results = paidRows.map(valueResult).filter((r) => r.final);
   return {
     wins: results.filter((r) => r.tone === "good").length,
     losses: results.filter((r) => r.tone === "bad").length,
     ties: results.filter((r) => r.tone === "push").length,
-    decided: results.filter((r) => r.extraPointsMattered).length,
+    decided: results.filter((r) => r.extraPointsMatter).length,
   };
 }
 

@@ -801,8 +801,8 @@ function totalCell(game) {
 // The bet itself: the value side at Splash's line ("ALA −15.5"), how much
 // better that is than the market ("2 pts better"; the user found "vs DK
 // −17.5, 2 pts better" too wordy, since the DK column is right there), and
-// why it's worth a look. `graded` switches to past tense for "Did value pay?".
-function valueCell(pick, tier, book, { graded = false } = {}) {
+// why it's worth a look.
+function valueCell(pick, tier, book) {
   if (!pick) return `<td class="ln">${noValue}</td>`;
   const tags = [];
   if (pick.flip) tags.push(`Favorite at ${book.short}`);
@@ -811,7 +811,7 @@ function valueCell(pick, tier, book, { graded = false } = {}) {
   // the number in the numeral voice, the words a step quieter.
   const unit = pick.points === 1 ? "pt" : "pts";
   return `<td class="ln ln-value"><span class="edge${tier ? ` ${tier}` : ""}">${esc(pick.team.alias)} ${esc(lineText(pick.splash))}</span>
-    <span class="ln-edge">${graded ? "was " : ""}<b>${esc(pick.points)}</b> ${unit} better<span class="sr-only"> than ${esc(possessive(book.full))} ${esc(lineText(pick.market))}</span></span>
+    <span class="ln-edge"><b>${esc(pick.points)}</b> ${unit} better<span class="sr-only"> than ${esc(possessive(book.full))} ${esc(lineText(pick.market))}</span></span>
     ${tags.length ? `<span class="ln-tags">${tags.map((t) => `<span class="ln-tag">${esc(t)}</span>`).join("")}</span>` : ""}</td>`;
 }
 
@@ -857,27 +857,37 @@ const PAID_GROUPS = [
   ["waiting", "Waiting for a score"],
 ];
 
-// "Did value pay?": each value pick that's kicked off, graded at Splash's
-// line (pick status, so green/red with the drawn icons is earned here),
-// grouped Live / Final / Waiting under divider rows like the day dividers.
+// Value sides: each value pick that's kicked off, graded at Splash's line
+// (pick status, so green/red with the drawn icons is earned here), grouped
+// Live / Final / Waiting under divider rows like the day dividers. The side
+// cell is just the team and its Splash line, with no "N pts better": most
+// value sides cover or don't at either line (FSU up 6-0 with half a point
+// of value is covering at DK's line too), and an earlier "Did value pay?"
+// version implied the extra points mattered every time. They're credited
+// only on rows where they're the difference (extraPointsMatter).
 function paidTable(rows, book) {
   const groups = paidGroups(rows);
+  const marketWould = (result) => {
+    const outcome = result.final
+      ? { lost: "would've lost", push: "would've pushed" }[result.atMarket]
+      : { "live-losing": "would be losing", "live-tied": "would be tied" }[result.atMarket];
+    return outcome ? `At ${book.short} ${lineText(result.line)} it ${outcome}` : "";
+  };
   const row = (r) => {
     const result = valueResult(r);
     const tone = result.tone === "pending" ? "" : result.tone;
-    const why = result.extraPointsMattered
-      ? `<span class="ln-sub">${esc(book.short)} ${esc(lineText(r.pick.market))} would've ${result.atMarket === "push" ? "pushed" : "lost"}</span>`
-      : "";
-    return `<tr>${gameCell(r.game, paidScore(r.game))}${valueCell(r.pick, r.tier, book, { graded: true })}
-      <td class="ln"><span class="res ${tone}">${statusIcon(result)}${esc(result.label)}</span>${why}</td></tr>`;
+    const why = result.extraPointsMatter ? marketWould({ ...result, line: r.pick.market }) : "";
+    return `<tr>${gameCell(r.game, paidScore(r.game))}
+      <td class="ln"><span class="edge${r.tier ? ` ${r.tier}` : ""}">${esc(r.pick.team.alias)} ${esc(lineText(r.pick.splash))}</span></td>
+      <td class="ln"><span class="res ${tone}">${statusIcon(result)}${esc(result.label)}</span>${why ? `<span class="ln-sub">${esc(why)}</span>` : ""}</td></tr>`;
   };
   const bodies = PAID_GROUPS.filter(([key]) => groups[key].length)
     .map(([key, label]) => `<tbody><tr class="ln-day"><th colspan="3" scope="rowgroup">${label}</th></tr>${groups[key].map(row).join("")}</tbody>`)
     .join("");
-  return `<table class="board-table lines-table paid-table"><thead><tr><th>Game</th><th>Value</th><th>Result</th></tr></thead>${bodies}</table>`;
+  return `<table class="board-table lines-table paid-table"><thead><tr><th>Game</th><th>Splash line</th><th>Result</th></tr></thead>${bodies}</table>`;
 }
 
-// Game day: the "did value pay?" answer up top, linking down to the
+// Game day: how the value sides are doing, up top, linking down to the
 // details, so the tab's payoff isn't buried under the games still to pick.
 function renderLinesStrip(paidRows, tally) {
   const strip = $("lines-strip");
@@ -991,7 +1001,7 @@ function renderLines() {
   toggle.textContent = open ? "Hide other games" : `Show ${sections.other.length} other ${sections.other.length === 1 ? "game" : "games"}`;
 
   fill("paid", sections.paid, paidTable(sections.paid, book));
-  // With no value left to pick, "Did value pay?" is the more useful section,
+  // With no value left to pick, Value sides is the more useful section,
   // so it moves above the no-value Other games.
   const paidSec = $("lines-sec-paid");
   const otherSec = $("lines-sec-other");
@@ -1001,12 +1011,21 @@ function renderLines() {
   renderLinesStrip(sections.paid, tally);
   const graded = tally.wins + tally.losses + tally.ties;
   $("lines-count-paid").textContent = graded ? recordText(tally) : sections.paid.length;
-  // Whose record, at which line, and what the extra points did, in one line.
+  // Whose record, at which line, and whether the extra points changed any
+  // of it. Usually they didn't, and the note says so rather than implying
+  // the record is the value's doing.
   const record = recordText(tally);
-  $("lines-paid-note").textContent = graded
-    ? `Value sides went ${record} at Splash's lines` +
-      (tally.decided ? `; the extra points decided ${tally.decided === graded ? (graded === 1 ? "it" : "all of them") : tally.decided}.` : ".")
-    : "";
+  let paidNote = "";
+  if (graded) {
+    const all = tally.decided === graded;
+    paidNote = `Value sides went ${record} at Splash's lines. ` +
+      (tally.decided === 0
+        ? `Every result would've been the same at ${book.short}'s line.`
+        : all
+          ? `The extra points changed ${graded === 1 ? "the result" : "every result"}.`
+          : `The extra points changed ${tally.decided} of ${graded}; the rest would've been the same at ${book.short}'s line.`);
+  }
+  $("lines-paid-note").textContent = paidNote;
   $("lines-paid-note").hidden = !graded;
 
   // What each tier means, right under its heading where it's read, not in
@@ -1015,6 +1034,8 @@ function renderLines() {
   $("lines-desc-best").textContent =
     `2+ points better than ${book.short}, a team ${book.short} favors getting points at Splash, or a point or more across ${keys}.`;
   $("lines-desc-small").textContent = `1 to 1.5 points better, or half a point across 3, 7 or 10.`;
+  $("lines-desc-paid").textContent =
+    `Value games that have kicked off, at Splash's line. A note marks any game where the extra points are the difference.`;
   $("lines-note").innerHTML = `Small grey "open" numbers are where ${esc(book.short)} opened, often weeks earlier.`;
 }
 
