@@ -859,7 +859,9 @@ const PAID_GROUPS = [
 
 // Value sides: each value pick that's kicked off, graded at Splash's line
 // (pick status, so green/red with the drawn icons is earned here), grouped
-// Live / Final / Waiting under divider rows like the day dividers. The side
+// Live / Final / Waiting under divider rows like the day dividers. Splash
+// and DK columns stay, so you can still see why it was value (the user
+// missed them once a game kicked off), but the side
 // cell is just the team and its Splash line, with no "N pts better": most
 // value sides cover or don't at either line (FSU up 6-0 with half a point
 // of value is covering at DK's line too), and an earlier "Did value pay?"
@@ -877,14 +879,21 @@ function paidTable(rows, book) {
     const result = valueResult(r);
     const tone = result.tone === "pending" ? "" : result.tone;
     const why = result.extraPointsMatter ? marketWould({ ...result, line: r.pick.market }) : "";
+    // Splash and DK columns as in the tables above (home team's line), so
+    // the row still shows why this side was value once it's kicked off.
+    // The result stacks under the pill, like "2 pts better" above, which
+    // keeps the columns lined up with those tables and fits a phone.
+    const market = lineText(r.game.market?.spread);
     return `<tr>${gameCell(r.game, paidScore(r.game))}
-      <td class="ln"><span class="edge${r.tier ? ` ${r.tier}` : ""}">${esc(r.pick.team.alias)} ${esc(lineText(r.pick.splash))}</span></td>
-      <td class="ln"><span class="res ${tone}">${statusIcon(result)}${esc(result.label)}</span>${why ? `<span class="ln-sub">${esc(why)}</span>` : ""}</td></tr>`;
+      <td class="ln"><span class="ln-team">${esc(r.game.home.alias)}</span> ${esc(lineText(r.game.home.spread))}</td>
+      <td class="ln">${market == null ? noValue : esc(market)}</td>
+      <td class="ln ln-value"><span class="edge${r.tier ? ` ${r.tier}` : ""}">${esc(r.pick.team.alias)} ${esc(lineText(r.pick.splash))}</span>
+        <span class="res ${tone}">${statusIcon(result)}${esc(result.label)}</span>${why ? `<span class="ln-sub">${esc(why)}</span>` : ""}</td></tr>`;
   };
   const bodies = PAID_GROUPS.filter(([key]) => groups[key].length)
-    .map(([key, label]) => `<tbody><tr class="ln-day"><th colspan="3" scope="rowgroup">${label}</th></tr>${groups[key].map(row).join("")}</tbody>`)
+    .map(([key, label]) => `<tbody><tr class="ln-day"><th colspan="4" scope="rowgroup">${label}</th></tr>${groups[key].map(row).join("")}</tbody>`)
     .join("");
-  return `<table class="board-table lines-table paid-table"><thead><tr><th>Game</th><th>Splash line</th><th>Result</th></tr></thead>${bodies}</table>`;
+  return `<table class="board-table lines-table paid-table"><thead><tr><th>Game</th><th>Splash</th><th>${esc(book.short)}</th><th>Value</th></tr></thead>${bodies}</table>`;
 }
 
 // Game day: how the value sides are doing, up top, linking down to the

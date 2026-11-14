@@ -1455,7 +1455,14 @@ h1 {
 
 /* "At DK −14 it would've pushed" under a graded result wraps on a phone instead
    of pushing the table wide. */
-.paid-table td:nth-child(3) .ln-sub {
+/* The result line under the value pill. */
+.paid-table .ln-value .res {
+  display: flex;
+  margin-top: 4px;
+  font-size: 15px;
+}
+
+.paid-table td:last-child .ln-sub {
   white-space: normal;
 }
 
@@ -1733,23 +1740,23 @@ h1 {
   .lines-table th:nth-child(4) { width: 27%; }
   .lines-table th:nth-child(5) { width: 14%; }
 
-  .paid-table th:nth-child(1) { width: 30%; }
-  .paid-table th:nth-child(2) { width: 22%; }
-  .paid-table th:nth-child(3) { width: 48%; }
+  /* No O/U column: Value takes its width, so the first four columns line
+     up with the tables above. */
+  .paid-table th:nth-child(4) { width: 41%; }
 }
 
 /* Phones: shared fixed columns (O/U is hidden), so stacked Best / Smaller /
    Other tables line up instead of each sizing its own. Not below 360px,
    where the widest real cells need auto layout to fit. */
 @media (min-width: 360px) and (max-width: 599px) {
-  .lines-table:not(.paid-table) {
+  .lines-table {
     table-layout: fixed;
   }
 
-  .lines-table:not(.paid-table) th:nth-child(1) { width: 31%; }
-  .lines-table:not(.paid-table) th:nth-child(2) { width: 26%; }
-  .lines-table:not(.paid-table) th:nth-child(3) { width: 14%; }
-  .lines-table:not(.paid-table) th:nth-child(4) { width: 29%; }
+  .lines-table th:nth-child(1) { width: 31%; }
+  .lines-table th:nth-child(2) { width: 26%; }
+  .lines-table th:nth-child(3) { width: 14%; }
+  .lines-table th:nth-child(4) { width: 29%; }
 }
 
 /* Phones drop O/U (DK-only and no use for picks against the spread) and the
@@ -1774,8 +1781,8 @@ h1 {
     padding-right: 4px;
   }
 
-  .lines-table:not(.paid-table) th:nth-child(4),
-  .lines-table:not(.paid-table) td:nth-child(4) {
+  .lines-table th:nth-child(4),
+  .lines-table td:nth-child(4) {
     padding-right: 10px;
   }
 }
@@ -1806,10 +1813,8 @@ h1 {
     padding-left: 8px;
   }
 
-  .lines-table:not(.paid-table) th:nth-child(4),
-  .lines-table:not(.paid-table) td:nth-child(4),
-  .paid-table th:last-child,
-  .paid-table td:last-child {
+  .lines-table th:nth-child(4),
+  .lines-table td:nth-child(4) {
     padding-right: 8px;
   }
 
